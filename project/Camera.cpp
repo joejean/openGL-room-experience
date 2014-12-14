@@ -7,11 +7,17 @@ Camera::Camera(){
 }
 
 
-void Camera::setAttribLocations(GLuint camera_matrix_attrib_location, GLuint projection_matrix_attrib_location){
+void Camera::setAttribLocations(GLuint camera_matrix_attrib_location, GLuint projection_matrix_attrib_location,GLuint gaze_location){
  this->camera_matrix_attrib_location = camera_matrix_attrib_location;
  this->projection_matrix_attrib_location = projection_matrix_attrib_location;
+ this->gaze_location = gaze_location;
 }
 
+
+void Camera::setGaze(){
+	//send the gaze vector to fshader
+	glUniform3f(gaze_location,gaze.x,gaze.y,gaze.z);
+}
 
 void Camera::setOrthographicProjection(float l, float r, float b, float t, float n, float f){
 	float projection_mat[16];
@@ -41,7 +47,7 @@ void Camera::setPerspectiveProjection(float l, float r, float b, float t, float 
 
 
 void Camera::setPerspectiveProjection(float fov, float aspect, float n, float f){ /*aspect = width/height */
-	float t = abs(n)*tan(fov* 3.14159265358979323846/360); 
+	float t = float(abs(n)*tan(fov* 3.14159265358979323846/360)); 
 	float b = -t;
 	float r = aspect*t;
 	float l = -r;
@@ -49,7 +55,7 @@ void Camera::setPerspectiveProjection(float fov, float aspect, float n, float f)
 }
 
 void Camera::setCameraMatrix(glm::vec3 camPosition, glm::vec3 gaze, glm::vec3 up){
-	float camera_mat[16];
+
 	this->gaze = gaze;
 	this->position = camPosition;
 	this->up = up;
@@ -61,6 +67,13 @@ void Camera::setCameraMatrix(){
 	gaze = glm::normalize(gaze);
 	up = glm::normalize(up);
 	glm::vec3 w = -gaze;
+
+	setGaze();
+
+
+	//GLint gaze_loc = glGetUniformLocation(program_1,"gaze");
+	//glUniform3f(gaze_loc,3,GL_FALSE,gaze.x,gaze.y,gaze.z);
+
 	glm::vec3 v = up;
 	glm::vec3 u = glm::cross(v,w);
 	glm::mat4 Mcam = glm::inverse(glm::mat4(glm::vec4(u,0.0), glm::vec4(v,0.0), glm::vec4(w,0.0) , glm::vec4(position,1.0)));

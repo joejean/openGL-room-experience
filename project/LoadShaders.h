@@ -17,5 +17,5 @@ struct ShaderInfo {
 	const char *fShaderFile;
 };
 
-GLuint LoadShaders( ShaderInfo shaderInfo );
-const char* getShaderProgram( const char *filePath, string &shaderProgramText );
+GLuint LoadShaders(ShaderInfo shaderInfo);
+const char* getShaderProgram(const char *filePath, string &shaderProgramText);

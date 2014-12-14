@@ -30,18 +30,21 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="fragment_shader.fsh">
+    <None Include="shader_1.vs">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="vertex_shader.vsh">
+    <None Include="shader_1.fs">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="fragment_shader_1.fsh">
+    <None Include="shader_0.fs">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="vertex_shader_1.vsh">
+    <None Include="shader_0.vs">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
@@ -59,6 +62,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="includes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

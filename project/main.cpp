@@ -12,16 +12,22 @@ using namespace std;
 
 #define BUFFER_OFFSET(offset) ( (void *) offset )
 #define EPS 0.000000001
+#define PI 3.14159265359
 
-GLuint time_unif;
+//Assimp::Importer importer;
+
 GLuint Mcam_unif;
 GLuint Mproj_unif;
+GLuint gaze_unif;//send the gaze vector to fshader to do spot lighting
+
 
 GLuint camPos;
 
 Camera cam;
 
 glm::vec3 camPosition, gaze, up;
+
+glm::vec2 mouseRotate;
 
 //GLuint shaderProgramID; //replaced with GLuint program
 
@@ -130,53 +136,7 @@ GLfloat texcoordsBot[] = {
 };
 
 
-/************Coordinates fo points********************/
-/*
-Front
-1.+s,+s,+s||(1/2,1/3)
-2.-s,+s,+s||(1/4,1/3)
-3.-s,-s,+s||(1/4,2/3)
-4.+s,-s,+s||(1/2,2/3)
-
-Back
-5.+s,+s,-s||(3/4,1/3)
-6.-s,+s,-s||(1,1/3)
-7.-s,-s,-s||(1,2/3)
-8.+s,-s,-s||(3/4,2/3)
-
-Left
-2.-s,+s,+s||(1/4,1/3)
-3.-s,-s,+s||(1/4,2/3)
-6.-s,+s,-s||(0,1/3)
-7.-s,-s,-s||(0,2/3)
-
-Right
-1.+s,+s,+s||(1/2,1/3)
-4.+s,-s,+s||(1/2,2/3)
-5.+s,+s,-s||(3/4,1/3)
-8.+s,-s,-s||(3/4,2/3)
-
-Top
-1.+s,+s,+s||(1/2,1/3)
-2.-s,+s,+s||(1/4,1/3)
-5.+s,+s,-s||(1/2,0)
-6.-s,+s,-s||(1/4,0)
-
-Bottom
-3.-s,-s,+s||(1/4,2/3)
-4.+s,-s,+s||(1/2,2/3)
-7.-s,-s,-s||(1/4,1)
-8.+s,-s,-s||(1/2,1)
-
-
-*/
-
-
-
-
-
 void mouse(int button, int state, int xx, int yy){
-	int i, j;
 	// normalize xx and yy to x and y
 	GLfloat x = 2 * (GLfloat)xx / g_width - 1;
 	GLfloat y = 1 - 2 * (GLfloat)yy / g_width;
@@ -186,29 +146,147 @@ void mouse(int button, int state, int xx, int yy){
 		}
 		else if (state == GLUT_UP){
 			//printf("Mouse Up Function");
-			p1_x = 0.000001; p1_y = 0.000001;
+			p1_x = EPS; p1_y = EPS;
 
-			//when mouse is released update the base rotation matrix
-			for (int i = 0; i < 16; i++)
-			{
-				if (i % 4 == 0) printf("\n");
-				old_rotate_mat[i] = rotate_mat[i];
-				printf("%f ", old_rotate_mat[i]);
-			}
+
 		}
 	}
 }
 
 void mouseMotion(int xx, int yy){
 
-	printf("X: %d", xx);
-	printf("Y: %d\n", yy);
+	//printf("X: %d", xx);
+	//printf("Y: %d\n", yy);
+
 	GLfloat x = 2 * (GLfloat)xx / g_width - 1;
 	GLfloat y = 1 - 2 * (GLfloat)yy / g_width;
-	p2_x = x; p2_y = y;
+
+	x = x*PI;
+	y = y*PI;
+
+	glm::vec3 o_gaze = glm::vec3(0, 0, -1);
+	glm::vec3 o_up = glm::vec3(0, 1, 0);
+	glm::vec3 o_w = glm::cross(-o_gaze, o_up);
+
+	cam.gaze = cos(y)*o_gaze + sin(y)*o_up;
+	cam.up = cos(y)*o_up - sin(y)*o_gaze;
+
+	//temperory cam parameters
+	glm::vec3 t_gaze = cam.gaze;
+	glm::vec3 t_up = cam.up;
+	glm::vec3 t_w = glm::cross(-cam.gaze, cam.up);
+
+	cam.gaze = cos(x)*t_gaze - sin(x)*t_w;
+
+	glUseProgram(program_0);
+	cam.setCameraMatrix();
+
+	glUseProgram(program_1);
+	cam.setCameraMatrix();
+	glutPostRedisplay();
+
+	
 
 	glutPostRedisplay();
 }
+
+
+
+void special(int key, int x, int y)
+{
+
+	float theta = 0.05f;
+
+
+	glm::vec3 old_cam_gaze = cam.gaze;
+	glm::vec3 old_cam_up = cam.up;
+	glm::vec3 old_cam_w = glm::cross(-cam.gaze, cam.up);
+
+	switch (key)
+	{
+	case GLUT_KEY_UP:
+
+		cam.gaze = cos(theta)*old_cam_gaze + sin(theta)*old_cam_up;
+		cam.up = cos(theta)*old_cam_up - sin(theta)*old_cam_gaze;
+		glUseProgram(program_0);
+		cam.setCameraMatrix();
+		glUseProgram(program_1);
+		cam.setCameraMatrix();
+		glutPostRedisplay();
+		break;
+
+	case GLUT_KEY_DOWN:
+
+		cam.gaze = cos(theta)*old_cam_gaze - sin(theta)*old_cam_up;
+		cam.up = cos(theta)*old_cam_up + sin(theta)*old_cam_gaze;
+		glUseProgram(program_0);
+		cam.setCameraMatrix();
+		glUseProgram(program_1);
+		cam.setCameraMatrix();
+		glutPostRedisplay();
+		break;
+
+	case GLUT_KEY_LEFT:
+		cam.gaze = cos(theta)*old_cam_gaze + sin(theta)*old_cam_w;
+		glUseProgram(program_0);
+		cam.setCameraMatrix();
+		glUseProgram(program_1);
+		cam.setCameraMatrix();
+		glutPostRedisplay();
+		break;
+
+	case GLUT_KEY_RIGHT:
+
+		cam.gaze = cos(theta)*old_cam_gaze - sin(theta)*old_cam_w;
+		glUseProgram(program_0);
+		cam.setCameraMatrix();
+		glUseProgram(program_1);
+		cam.setCameraMatrix();
+		glutPostRedisplay();
+		break;
+	}
+}
+
+
+void keyboard(unsigned char key, int x, int y){
+	float next_x = cam.position.x + 0.1f*cam.gaze.x;
+	float next_y = cam.position.y + 0.1f*cam.gaze.y;
+	float next_z = cam.position.z + 0.1f*cam.gaze.z;
+
+	float prev_x = cam.position.x - 0.1f*cam.gaze.x;
+	float prev_y = cam.position.y - 0.1f*cam.gaze.y;
+	float prev_z = cam.position.z - 0.1f*cam.gaze.z;
+
+
+	if (key == 'w'){
+		if (next_x > -8.0f  && next_x < 8.0f &&
+			next_y > -8.0f  && next_y < 8.0f &&
+			next_z > -8.0f  && next_z < 8.0f
+			){
+			cam.position += 0.1f*cam.gaze;
+			glUseProgram(program_0);
+			cam.setCameraMatrix();
+			glUseProgram(program_1);
+			cam.setCameraMatrix();
+			glutPostRedisplay();
+		}
+	}
+	else if (key == 's'){
+		if (prev_x > -8.0f  && prev_x < 8.0f &&
+			prev_y > -8.0f  && prev_y < 8.0f &&
+			prev_z > -8.0f  && prev_z < 8.0f
+			){
+			cam.position -= 0.1f*cam.gaze;
+			glUseProgram(program_0);
+			cam.setCameraMatrix();
+			glUseProgram(program_1);
+			cam.setCameraMatrix();
+			glutPostRedisplay();
+		}
+	}
+}
+
+
 
 void loadTextures(void){
 
@@ -230,6 +308,8 @@ void loadTextures(void){
 void init_camera_top(){
 	Mcam_unif = glGetUniformLocation(program_0, "Mcam");
 	Mproj_unif = glGetUniformLocation(program_0, "Mproj");
+	gaze_unif = glGetUniformLocation(program_0, "gaze");
+
 
 	camPos = glGetUniformLocation(program_0, "camPos");
 
@@ -237,7 +317,7 @@ void init_camera_top(){
 	glEnableVertexAttribArray(vnewEyePos);
 	glVertexAttribPointer(vnewEyePos, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 
-	cam.setAttribLocations(Mcam_unif, Mproj_unif);
+	cam.setAttribLocations(Mcam_unif, Mproj_unif, gaze_unif);
 
 	cam.position = glm::vec3(0, 0, 0);
 	cam.gaze = glm::vec3(0, 0, -1);
@@ -249,6 +329,7 @@ void init_camera_top(){
 void init_camera_bottom(){
 	Mcam_unif = glGetUniformLocation(program_1, "Mcam");
 	Mproj_unif = glGetUniformLocation(program_1, "Mproj");
+	gaze_unif = glGetUniformLocation(program_1, "gaze");
 
 	camPos = glGetUniformLocation(program_1, "camPos");
 
@@ -256,7 +337,7 @@ void init_camera_bottom(){
 	glEnableVertexAttribArray(vnewEyePos);
 	glVertexAttribPointer(vnewEyePos, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 
-	cam.setAttribLocations(Mcam_unif, Mproj_unif);
+	cam.setAttribLocations(Mcam_unif, Mproj_unif, gaze_unif);
 
 	cam.position = glm::vec3(0, 0, 0);
 	cam.gaze = glm::vec3(0, 0, -1);
@@ -267,9 +348,10 @@ void init_camera_bottom(){
 
 void init_topFaces(void){
 
-
-	ShaderInfo shader_0 = { GL_VERTEX_SHADER, "vertex_shader.vsh", GL_FRAGMENT_SHADER, "fragment_shader.fsh" };
+	ShaderInfo shader_0 = { GL_VERTEX_SHADER, "shader_0.vs", GL_FRAGMENT_SHADER, "shader_0.fs" };
 	program_0 = LoadShaders(shader_0);
+	//Shader shader0("myshader0");
+	//program_0 = shader0.Bind();
 
 	glUseProgram(program_0);
 
@@ -324,8 +406,11 @@ void init_bottomFaces()
 
 	//*****************RENDER BOTTOM FACE
 	//Use a new set of shaders for different uniform textures --- DOESNT WORK
-	ShaderInfo shader_1 = { GL_VERTEX_SHADER, "vertex_shader_1.vsh", GL_FRAGMENT_SHADER, "fragment_shader_1.fsh" };
+	ShaderInfo shader_1 = { GL_VERTEX_SHADER, "shader_1.vs", GL_FRAGMENT_SHADER, "shader_1.fs" };
 	program_1 = LoadShaders(shader_1);
+
+	//Shader shader1("myshader1");
+	//program_1 = shader1.Bind();
 
 	glUseProgram(program_1);
 
@@ -389,15 +474,20 @@ void display(){
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUniform3f(camPos, cam.position.x, cam.position.y, cam.position.z);
-
 	//Draw Topfaces
 	glUseProgram(program_0);
+
+	glUniform3f(camPos, cam.position.x, cam.position.y, cam.position.z);
+
 	glBindVertexArray(VAOs[TopFaces]);
 	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
 	
+
 	//Draw Bottomface
 	glUseProgram(program_1);
+
+	glUniform3f(camPos, cam.position.x, cam.position.y, cam.position.z);
+
 	glBindVertexArray(VAOs[BottomFace]);
 	glDrawArrays(GL_TRIANGLES, 0, NumVerticesBot);
 
@@ -406,99 +496,6 @@ void display(){
 }
 
 
-void special(int key, int x, int y)
-{
-
-	float theta = 0.10;
-
-
-	glm::vec3 old_cam_gaze = cam.gaze;
-	glm::vec3 old_cam_up = cam.up;
-	glm::vec3 old_cam_w = glm::cross(-cam.gaze, cam.up);
-
-	switch (key)
-	{
-	case GLUT_KEY_UP:
-
-		cam.gaze = cos(theta)*old_cam_gaze + sin(theta)*old_cam_up;
-		cam.up = cos(theta)*old_cam_up - sin(theta)*old_cam_gaze;
-		glUseProgram(program_0);
-		cam.setCameraMatrix();
-		glUseProgram(program_1);
-		cam.setCameraMatrix();
-		glutPostRedisplay();
-		break;
-
-	case GLUT_KEY_DOWN:
-
-		cam.gaze = cos(theta)*old_cam_gaze - sin(theta)*old_cam_up;
-		cam.up = cos(theta)*old_cam_up + sin(theta)*old_cam_gaze;
-		glUseProgram(program_0);
-		cam.setCameraMatrix();
-		glUseProgram(program_1);
-		cam.setCameraMatrix();
-		glutPostRedisplay();
-		break;
-
-	case GLUT_KEY_LEFT:
-		cam.gaze = cos(theta)*old_cam_gaze + sin(theta)*old_cam_w;
-		glUseProgram(program_0);
-		cam.setCameraMatrix();
-		glUseProgram(program_1);
-		cam.setCameraMatrix();
-		glutPostRedisplay();
-		break;
-
-	case GLUT_KEY_RIGHT:
-
-		cam.gaze = cos(theta)*old_cam_gaze - sin(theta)*old_cam_w;
-		glUseProgram(program_0);
-		cam.setCameraMatrix();
-		glUseProgram(program_1);
-		cam.setCameraMatrix();
-		glutPostRedisplay();
-		break;
-	}
-}
-
-
-void keyboard(unsigned char key, int x, int y){
-	float next_x = cam.position.x + 0.1f*cam.gaze.x;
-	float next_y = cam.position.y + 0.1f*cam.gaze.y;
-	float next_z = cam.position.z + 0.1f*cam.gaze.z;
-
-	float prev_x = cam.position.x - 0.1f*cam.gaze.x;
-	float prev_y = cam.position.y - 0.1f*cam.gaze.y;
-	float prev_z = cam.position.z - 0.1f*cam.gaze.z;
-
-
-	if (key == 'a'){
-		if (next_x > -8.0f  && next_x < 8.0f &&
-			next_y > -8.0f  && next_y < 8.0f &&
-			next_z > -8.0f  && next_z < 8.0f
-			){
-			cam.position += 0.1f*cam.gaze;
-			glUseProgram(program_0);
-			cam.setCameraMatrix();
-			glUseProgram(program_1);
-			cam.setCameraMatrix();
-			glutPostRedisplay();
-		}
-	}
-	else if (key == 'z'){
-		if (prev_x > -8.0f  && prev_x < 8.0f &&
-			prev_y > -8.0f  && prev_y < 8.0f &&
-			prev_z > -8.0f  && prev_z < 8.0f
-			){
-			cam.position -= 0.1f*cam.gaze;
-			glUseProgram(program_0);
-			cam.setCameraMatrix();
-			glUseProgram(program_1);
-			cam.setCameraMatrix();
-			glutPostRedisplay();
-		}
-	}
-}
 
 int main(int argc, char **argv){
 	

@@ -3,6 +3,8 @@
 #include <sstream>
 #include "texture.h"
 #include "LoadShaders.h"
+#include "model.h"
+#include "tiny_obj_loader.h"
 
 
 #include "includes.h"
@@ -38,8 +40,8 @@ GLfloat rotate_mat[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 //matrix to store the rotation from earlier
 GLfloat old_rotate_mat[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 
-int g_height = 512;
-int g_width = 512;
+int g_height =800;
+int g_width = 800;
 
 
 
@@ -52,6 +54,7 @@ GLuint Mrot_unif_1;//location of the Mrot in shader for bottom
 
 GLuint program_0;
 GLuint program_1;
+GLuint pear_program;
 
 
 Texture tex0,tex1,tex2;
@@ -69,7 +72,7 @@ enum Buffer_IDs { ArrayBuffer, NumBuffers };
 GLuint VAOs[NumVAOs];
 GLuint Buffers[NumBuffers];
 
-//dimensions for the cube
+//dimensions for the cube SIZE
 GLfloat s = 10.0f;
 
 
@@ -161,8 +164,8 @@ void mouseMotion(int xx, int yy){
 	GLfloat x = 2 * (GLfloat)xx / g_width - 1;
 	GLfloat y = 1 - 2 * (GLfloat)yy / g_width;
 
-	x = x*PI;
-	y = y*PI;
+	x = x*PI*2;
+	y = y*PI*2;
 
 	glm::vec3 o_gaze = glm::vec3(0, 0, -1);
 	glm::vec3 o_up = glm::vec3(0, 1, 0);
@@ -177,6 +180,7 @@ void mouseMotion(int xx, int yy){
 	glm::vec3 t_w = glm::cross(-cam.gaze, cam.up);
 
 	cam.gaze = cos(x)*t_gaze - sin(x)*t_w;
+
 
 	glUseProgram(program_0);
 	cam.setCameraMatrix();
@@ -348,6 +352,18 @@ void loadTextures(void){
 
 }
 
+Model *pear;
+
+
+void init_objects(){
+
+	ShaderInfo pear_shader = { GL_VERTEX_SHADER, "pear_shader.vs", GL_FRAGMENT_SHADER, "pear_shader.fs" };
+	pear_program = LoadShaders(pear_shader);
+
+	pear = new Model(pear_program, "Objects/pear/pear.obj", "Objects/pear/", false, false, 1);
+	pear->Draw();
+}
+
 void init_camera_top(){
 	Mcam_unif = glGetUniformLocation(program_0, "Mcam");
 	Mproj_unif = glGetUniformLocation(program_0, "Mproj");
@@ -388,6 +404,7 @@ void init_camera_bottom(){
 	cam.setCameraMatrix();
 	cam.setPerspectiveProjection(60, 1, -1, -100);
 }
+
 
 void init_topFaces(void){
 
@@ -540,8 +557,10 @@ void display(){
 
 
 
+
 int main(int argc, char **argv){
 	
+
 	glutInit(&argc,argv);			 //Initialize GLUT
 
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
@@ -565,6 +584,9 @@ int main(int argc, char **argv){
 
 
 	loadTextures();
+
+	init_objects();
+
 
 	init_topFaces();
 	init_bottomFaces();

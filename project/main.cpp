@@ -249,6 +249,9 @@ void special(int key, int x, int y)
 
 
 void keyboard(unsigned char key, int x, int y){
+
+	glm::vec3 side = 0.1f*glm::cross(cam.gaze, cam.up);
+
 	float next_x = cam.position.x + 0.1f*cam.gaze.x;
 	float next_y = cam.position.y + 0.1f*cam.gaze.y;
 	float next_z = cam.position.z + 0.1f*cam.gaze.z;
@@ -257,13 +260,22 @@ void keyboard(unsigned char key, int x, int y){
 	float prev_y = cam.position.y - 0.1f*cam.gaze.y;
 	float prev_z = cam.position.z - 0.1f*cam.gaze.z;
 
+	float side_right_x = cam.position.x - side.x;
+	float side_right_y = cam.position.y - side.y;
+	float side_right_z = cam.position.z - side.z;
+
+	float side_left_x = cam.position.x + side.x;
+	float side_left_y = cam.position.y + side.y;
+	float side_left_z = cam.position.z + side.z;
+
 
 	if (key == 'w'){
-		if (next_x > -8.0f  && next_x < 8.0f &&
-			next_y > -8.0f  && next_y < 8.0f &&
-			next_z > -8.0f  && next_z < 8.0f
+		if (next_x > -(s-2)  && next_x < (s-2) &&
+			next_y > -(s-2)  && next_y < (s-2) &&
+			next_z > -(s-2)  && next_z < (s-2)
 			){
-			cam.position += 0.1f*cam.gaze;
+			cam.position.x += 0.1f*cam.gaze.x;
+			cam.position.z += 0.1f*cam.gaze.z;
 			glUseProgram(program_0);
 			cam.setCameraMatrix();
 			glUseProgram(program_1);
@@ -272,11 +284,42 @@ void keyboard(unsigned char key, int x, int y){
 		}
 	}
 	else if (key == 's'){
-		if (prev_x > -8.0f  && prev_x < 8.0f &&
-			prev_y > -8.0f  && prev_y < 8.0f &&
-			prev_z > -8.0f  && prev_z < 8.0f
+		if (prev_x > -(s-2)  && prev_x < (s-2) &&
+			prev_y > -(s-2)  && prev_y < (s-2) &&
+			prev_z > -(s-2)  && prev_z < (s-2)
 			){
-			cam.position -= 0.1f*cam.gaze;
+			cam.position.x -= 0.1f*cam.gaze.x;
+			cam.position.z -= 0.1f*cam.gaze.z;
+			glUseProgram(program_0);
+			cam.setCameraMatrix();
+			glUseProgram(program_1);
+			cam.setCameraMatrix();
+			glutPostRedisplay();
+		}
+	}
+	else if (key == 'a'){
+		if (side_right_x > -(s - 2) && side_right_x < (s - 2) &&
+			side_right_x > -(s - 2) && side_right_x < (s - 2) &&
+			side_right_x > -(s - 2) && side_right_x < (s - 2)
+			){
+			
+			cam.position.x -= side.x;
+			cam.position.z -= side.z;
+			glUseProgram(program_0);
+			cam.setCameraMatrix();
+			glUseProgram(program_1);
+			cam.setCameraMatrix();
+			glutPostRedisplay();
+		}
+	}
+	else if (key == 'd'){
+		if (side_left_x > -(s - 2) && side_left_x < (s - 2) &&
+			side_left_x > -(s - 2) && side_left_x < (s - 2) &&
+			side_left_x > -(s - 2) && side_left_x < (s - 2)
+			){
+
+			cam.position.x += side.x;
+			cam.position.z += side.z;
 			glUseProgram(program_0);
 			cam.setCameraMatrix();
 			glUseProgram(program_1);
@@ -319,7 +362,7 @@ void init_camera_top(){
 
 	cam.setAttribLocations(Mcam_unif, Mproj_unif, gaze_unif);
 
-	cam.position = glm::vec3(0, 0, 0);
+	cam.position = glm::vec3(0, -5, 0);
 	cam.gaze = glm::vec3(0, 0, -1);
 	cam.up = glm::vec3(0, 1, 0);
 	cam.setCameraMatrix();
@@ -339,7 +382,7 @@ void init_camera_bottom(){
 
 	cam.setAttribLocations(Mcam_unif, Mproj_unif, gaze_unif);
 
-	cam.position = glm::vec3(0, 0, 0);
+	cam.position = glm::vec3(0, -5, 0);
 	cam.gaze = glm::vec3(0, 0, -1);
 	cam.up = glm::vec3(0, 1, 0);
 	cam.setCameraMatrix();

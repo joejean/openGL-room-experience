@@ -78,11 +78,11 @@ GLuint Buffers[NumBuffers];
 //dimensions for the cube SIZE
 GLfloat s = 110.0f;
 
-GLfloat w = 20.0f;
-GLfloat h = 4.0f;
-GLfloat l = 10.0f;
+GLfloat w = 2.0f;
+GLfloat h = 1.5f;
+GLfloat l = 1.0f;
 
-GLfloat boxSize = 0.10f;
+GLfloat boxSize = 1.10f;
 
 
 //NumVertices = number of faces * 3;
@@ -108,8 +108,8 @@ GLfloat vertices[][3] = {
 	w, h, -l, -w, h, -l, -w, h, l,
 	w, h, -l, -w, h, l, w, h, l,
 	//bottom -- 437,478
-	//s,-s,s,         -s,-s,s,      -s,-s,-s,
-	//s,-s,s,         -s,-s,-s,      s,-s,-s
+	w,-h,l,         -w,-h,l,      -w,-h,-l,
+	w,-h,l,         -w,-h,-l,      w,-h,-l
 };
 
 /*
@@ -184,30 +184,30 @@ GLfloat boxVertices[] = {
 	boxSize, boxSize, -boxSize, -boxSize, boxSize, boxSize, boxSize, boxSize, boxSize,
 
 	//bottom -- 437,478
-	//boxSize,-boxSize,boxSize,         -boxSize,-boxSize,boxSize,      -boxSize,-boxSize,-boxSize,
-	//boxSize,-boxSize,boxSize,         -boxSize,-boxSize,-boxSize,      boxSize,-boxSize,-boxSize
+	boxSize,-boxSize,boxSize,         -boxSize,-boxSize,boxSize,      -boxSize,-boxSize,-boxSize,
+	boxSize,-boxSize,boxSize,         -boxSize,-boxSize,-boxSize,      boxSize,-boxSize,-boxSize
 };
 
 GLfloat boxTexcoords[] = {
 	//front -- 123, 134
-	1 / 2.0f, 1 / 3.0f, 1 / 4.0f, 1 / 3.0f, 1 / 4.0f, 2 / 3.0f,
-	1 / 2.0f, 1 / 3.0f, 1 / 4.0f, 2 / 3.0f, 1 / 2.0f, 2 / 3.0f,
+	1 / 2.0f, 1 / 3.0f,		1 / 4.0f, 1 / 3.0f,		1 / 4.0f, 2 / 3.0f,
+	1 / 2.0f, 1 / 3.0f,		1 / 4.0f, 2 / 3.0f,		1 / 2.0f, 2 / 3.0f,
 	//back -- 658,687
-	1.0f, 1 / 3.0f, 3 / 4.0f, 1 / 3.0f, 3 / 4.0f, 2 / 3.0f,
-	1.0f, 1 / 3.0f, 3 / 4.0f, 2 / 3.0f, 1.0f, 2 / 3.0f,
+	1.0f, 1 / 3.0f,		3 / 4.0f, 1 / 3.0f,		3 / 4.0f, 2 / 3.0f,
+	1.0f, 1 / 3.0f,		3 / 4.0f, 2 / 3.0f,		1.0f, 2 / 3.0f,
 
 	//left -- 267,273
-	1 / 4.0f, 1 / 3.0f, 0.0f, 1 / 3.0f, 0.0f, 2 / 3.0f,
-	1 / 4.0f, 1 / 3.0f, 0.0f, 2 / 3.0f, 1 / 4.0f, 2 / 3.0f,
+	1 / 4.0f, 1 / 3.0f,		0.0f, 1 / 3.0f,		0.0f, 2 / 3.0f,
+	1 / 4.0f, 1 / 3.0f,		0.0f, 2 / 3.0f,		1 / 4.0f, 2 / 3.0f,
 	//rgiht -- 514,548
-	3 / 4.0f, 1 / 3.0f, 1 / 2.0f, 1 / 3.0f, 1 / 2.0f, 2 / 3.0f,
-	3 / 4.0f, 1 / 3.0f, 1 / 2.0f, 2 / 3.0f, 3 / 4.0f, 2 / 3.0f,
+	3 / 4.0f, 1 / 3.0f,		1 / 2.0f, 1 / 3.0f,		1 / 2.0f, 2 / 3.0f,
+	3 / 4.0f, 1 / 3.0f,		1 / 2.0f, 2 / 3.0f,		3 / 4.0f, 2 / 3.0f,
 	//top -- 562,521
-	1 / 2.0f, 0.0f, 1 / 4.0f, 0.0f, 1 / 4.0f, 1 / 3.0f,
-	1 / 2.0f, 0.0f, 1 / 4.0f, 1 / 3.0f, 1 / 2.0f, 1 / 3.0f,
+	1 / 2.0f, 0.0f,		1 / 4.0f, 0.0f,			1 / 4.0f, 1 / 3.0f,
+	1 / 2.0f, 0.0f,		1 / 4.0f, 1 / 3.0f,		1 / 2.0f, 1 / 3.0f,
 	//bottom -- 437,478
-	//1/2.0f, 2/3.0f,        1/4.0f, 2/3.0f,     1/4.0f, 1.0f,
-	//1/2.0f, 2/3.0f,        1/4.0f, 1.0f,       1/2.0f, 1.0f
+	1/2.0f, 2/3.0f,        1/4.0f, 2/3.0f,     1/4.0f, 1.0f,
+	1/2.0f, 2/3.0f,        1/4.0f, 1.0f,       1/2.0f, 1.0f
 };
 
 
@@ -287,9 +287,6 @@ void mouseMotion(int xx, int yy){
 	glUseProgram(program_box);
 	cam.setCameraMatrix();
 
-	glutPostRedisplay();
-
-	
 
 	glutPostRedisplay();
 }
@@ -300,7 +297,6 @@ void special(int key, int x, int y)
 {
 
 	float theta = 0.05f;
-
 
 	glm::vec3 old_cam_gaze = cam.gaze;
 	glm::vec3 old_cam_up = cam.up;
@@ -469,26 +465,9 @@ void loadTextures(void){
 	tex1.Bind();
 
 	glActiveTexture(GL_TEXTURE3);
-	texBox.Load("cobblestone.jpg");
+	texBox.Load("Crate.png");
 	texBox.Bind();
 	
-}
-
-GLuint time_unif;
-Model *pear;
-
-
-void init_objects(){
-
-	//ShaderInfo pear_shader = { GL_VERTEX_SHADER, "pear_shader.vs", GL_FRAGMENT_SHADER, "pear_shader.fs" };
-	//pear_program = LoadShaders(pear_shader);
-
-	Shader shader("pear_shader");
-	GLuint program = shader.Bind();
-
-
-	pear = new Model(pear_program, "Objects/pear/pear.obj", "Objects/pear/", true, true, 1);
-	time_unif = glGetUniformLocation(program, "time");
 }
 
 void init_camera_top(){
@@ -551,6 +530,8 @@ void init_camera_box(){
 	cam.setCameraMatrix();
 	cam.setPerspectiveProjection(60, 1, -1, -100);
 }
+
+
 
 void init_topFaces(){
 
@@ -713,7 +694,7 @@ void init_box(){
 	glEnableVertexAttribArray(vTexcoord);
 	glVertexAttribPointer(vTexcoord, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(boxVertices)));
 
-	glUniform1i(glGetUniformLocation(program_box, "diffuseMap"), 0); // set the variable diffuseMap to 0 so that it uses texture0
+	glUniform1i(glGetUniformLocation(program_box, "diffuseMap"), 3); // set the variable diffuseMap to 0 so that it uses texture0
 
 	//get the rotation matrix location in the shader
 	Mrot_unif = glGetUniformLocation(program_box, "Mrot");
@@ -781,7 +762,7 @@ int main(int argc, char **argv){
 	glutInitContextVersion(3, 0);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 
-	glutCreateWindow("Rock is the Daady");
+	glutCreateWindow("Walking Dead, Floating Box");
 
 
 	glewExperimental = GL_TRUE;

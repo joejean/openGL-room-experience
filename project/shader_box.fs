@@ -3,7 +3,7 @@
 in vec2 s_fTexcoord;
 out vec4 fColor;
 
-uniform sampler2D diffuseMap;//GLTEXTURE0
+uniform sampler2D diffuseMap; //GLTEXTURE0
 
 void main () {
 

@@ -5,6 +5,9 @@
 #include "LoadShaders.h"
 #include "model.h"
 #include "tiny_obj_loader.h"
+#include "transform.h"
+#include "shader.h"
+#include "Mesh.h"
 
 
 #include "includes.h"
@@ -54,10 +57,10 @@ GLuint Mrot_unif_1;//location of the Mrot in shader for bottom
 
 GLuint program_0;
 GLuint program_1;
-GLuint pear_program;
+GLuint pear_program, program_box;
 
 
-Texture tex0,tex1,tex2;
+Texture tex0,tex1,tex2, texBox;
 
 /**********COPY CODE************/
 
@@ -66,19 +69,50 @@ Texture tex0,tex1,tex2;
 
 /****************COPY CODE*****************************/
 
-enum VAO_IDs { TopFaces,BottomFace, NumVAOs };
+enum VAO_IDs { TopFaces,BottomFace, smallBox, NumVAOs };
 enum Buffer_IDs { ArrayBuffer, NumBuffers };
 
 GLuint VAOs[NumVAOs];
 GLuint Buffers[NumBuffers];
 
 //dimensions for the cube SIZE
-GLfloat s = 10.0f;
+GLfloat s = 110.0f;
+
+GLfloat w = 20.0f;
+GLfloat h = 4.0f;
+GLfloat l = 10.0f;
+
+GLfloat boxSize = 0.10f;
 
 
 //NumVertices = number of faces * 3;
 const GLuint NumVertices = 30;
 
+GLfloat vertices[][3] = {
+	//front -- 123, 134
+	w, h, l, -w, h, l, -w, -h, l,
+	w, h, l, -w,-h, l,  w, -h, l,
+
+	//back -- 658,687
+	-w, h, -l, w, h, -l, w, -h, -l,
+	-w, h, -l, w, -h, -l, -w, -h, -l,
+
+	//left -- 267,273
+	-w, h, l, -w, h, -l, -w, -h, -l,
+	-w, h, l, -w, -h, -l, -w, -h, l,
+
+	//rgiht -- 514,548
+	w, h, -l, w, h, l, w, -h, l,
+	w, h, -l, w, -h, l, w, -h, -l,
+	//top -- 562,521
+	w, h, -l, -w, h, -l, -w, h, l,
+	w, h, -l, -w, h, l, w, h, l,
+	//bottom -- 437,478
+	//s,-s,s,         -s,-s,s,      -s,-s,-s,
+	//s,-s,s,         -s,-s,-s,      s,-s,-s
+};
+
+/*
 GLfloat vertices[] = {
 	//front -- 123, 134
 	s,s,s,        -s,s,s,        -s,-s,s,
@@ -102,6 +136,7 @@ GLfloat vertices[] = {
 	//s,-s,s,         -s,-s,s,      -s,-s,-s,
 	//s,-s,s,         -s,-s,-s,      s,-s,-s
 };
+*/
 
 GLfloat texcoords[] = {
 	//front -- 123, 134
@@ -126,18 +161,79 @@ GLfloat texcoords[] = {
 };
 
 
+
+
+GLfloat boxVertices[] = {
+	//front -- 123, 134
+	boxSize, boxSize, boxSize, -boxSize, boxSize, boxSize, -boxSize, -boxSize, boxSize,
+	boxSize, boxSize, boxSize, -boxSize, -boxSize, boxSize, boxSize, -boxSize, boxSize,
+
+	//back -- 658,687
+	-boxSize, boxSize, -boxSize, boxSize, boxSize, -boxSize, boxSize, -boxSize, -boxSize,
+	-boxSize, boxSize, -boxSize, boxSize, -boxSize, -boxSize, -boxSize, -boxSize, -boxSize,
+
+	//left -- 267,273
+	-boxSize, boxSize, boxSize, -boxSize, boxSize, -boxSize, -boxSize, -boxSize, -boxSize,
+	-boxSize, boxSize, boxSize, -boxSize, -boxSize, -boxSize, -boxSize, -boxSize, boxSize,
+
+	//rgiht -- 514,548
+	boxSize, boxSize, -boxSize, boxSize, boxSize, boxSize, boxSize, -boxSize, boxSize,
+	boxSize, boxSize, -boxSize, boxSize, -boxSize, boxSize, boxSize, -boxSize, -boxSize,
+	//top -- 562,521
+	boxSize, boxSize, -boxSize, -boxSize, boxSize, -boxSize, -boxSize, boxSize, boxSize,
+	boxSize, boxSize, -boxSize, -boxSize, boxSize, boxSize, boxSize, boxSize, boxSize,
+
+	//bottom -- 437,478
+	//boxSize,-boxSize,boxSize,         -boxSize,-boxSize,boxSize,      -boxSize,-boxSize,-boxSize,
+	//boxSize,-boxSize,boxSize,         -boxSize,-boxSize,-boxSize,      boxSize,-boxSize,-boxSize
+};
+
+GLfloat boxTexcoords[] = {
+	//front -- 123, 134
+	1 / 2.0f, 1 / 3.0f, 1 / 4.0f, 1 / 3.0f, 1 / 4.0f, 2 / 3.0f,
+	1 / 2.0f, 1 / 3.0f, 1 / 4.0f, 2 / 3.0f, 1 / 2.0f, 2 / 3.0f,
+	//back -- 658,687
+	1.0f, 1 / 3.0f, 3 / 4.0f, 1 / 3.0f, 3 / 4.0f, 2 / 3.0f,
+	1.0f, 1 / 3.0f, 3 / 4.0f, 2 / 3.0f, 1.0f, 2 / 3.0f,
+
+	//left -- 267,273
+	1 / 4.0f, 1 / 3.0f, 0.0f, 1 / 3.0f, 0.0f, 2 / 3.0f,
+	1 / 4.0f, 1 / 3.0f, 0.0f, 2 / 3.0f, 1 / 4.0f, 2 / 3.0f,
+	//rgiht -- 514,548
+	3 / 4.0f, 1 / 3.0f, 1 / 2.0f, 1 / 3.0f, 1 / 2.0f, 2 / 3.0f,
+	3 / 4.0f, 1 / 3.0f, 1 / 2.0f, 2 / 3.0f, 3 / 4.0f, 2 / 3.0f,
+	//top -- 562,521
+	1 / 2.0f, 0.0f, 1 / 4.0f, 0.0f, 1 / 4.0f, 1 / 3.0f,
+	1 / 2.0f, 0.0f, 1 / 4.0f, 1 / 3.0f, 1 / 2.0f, 1 / 3.0f,
+	//bottom -- 437,478
+	//1/2.0f, 2/3.0f,        1/4.0f, 2/3.0f,     1/4.0f, 1.0f,
+	//1/2.0f, 2/3.0f,        1/4.0f, 1.0f,       1/2.0f, 1.0f
+};
+
+
 //coordinates for the bottom surface, rendered separtately from the rest
 const GLuint NumVerticesBot = 6;
 
 GLfloat verticesBot[] = {
-	s, -s, s, -s, -s, s, -s, -s, -s,
-	s, -s, s, -s, -s, -s, s, -s, -s
+	w, -h, l, -w, -h, l, -w, -h, -l,
+	w, -h, l, -w, -h, -l, w, -h, -l,
 };
 GLfloat texcoordsBot[] = {
 	0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
 	0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f
 };
 
+
+const GLuint NumVerticeTop = 6;
+
+GLfloat verticesTop[] = {
+	s, -s, s, -s, -s, s, -s, -s, -s,
+	s, -s, s, -s, -s, -s, s, -s, -s
+};
+GLfloat texcoordsTop[] = {
+	0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+	0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f
+};
 
 void mouse(int button, int state, int xx, int yy){
 	// normalize xx and yy to x and y
@@ -187,6 +283,10 @@ void mouseMotion(int xx, int yy){
 
 	glUseProgram(program_1);
 	cam.setCameraMatrix();
+
+	glUseProgram(program_box);
+	cam.setCameraMatrix();
+
 	glutPostRedisplay();
 
 	
@@ -216,6 +316,8 @@ void special(int key, int x, int y)
 		cam.setCameraMatrix();
 		glUseProgram(program_1);
 		cam.setCameraMatrix();
+		glUseProgram(program_box);
+		cam.setCameraMatrix();
 		glutPostRedisplay();
 		break;
 
@@ -227,6 +329,8 @@ void special(int key, int x, int y)
 		cam.setCameraMatrix();
 		glUseProgram(program_1);
 		cam.setCameraMatrix();
+		glUseProgram(program_box);
+		cam.setCameraMatrix();
 		glutPostRedisplay();
 		break;
 
@@ -235,6 +339,8 @@ void special(int key, int x, int y)
 		glUseProgram(program_0);
 		cam.setCameraMatrix();
 		glUseProgram(program_1);
+		cam.setCameraMatrix();
+		glUseProgram(program_box);
 		cam.setCameraMatrix();
 		glutPostRedisplay();
 		break;
@@ -245,6 +351,8 @@ void special(int key, int x, int y)
 		glUseProgram(program_0);
 		cam.setCameraMatrix();
 		glUseProgram(program_1);
+		cam.setCameraMatrix();
+		glUseProgram(program_box);
 		cam.setCameraMatrix();
 		glutPostRedisplay();
 		break;
@@ -284,6 +392,8 @@ void keyboard(unsigned char key, int x, int y){
 			cam.setCameraMatrix();
 			glUseProgram(program_1);
 			cam.setCameraMatrix();
+			glUseProgram(program_box);
+			cam.setCameraMatrix();
 			glutPostRedisplay();
 		}
 	}
@@ -297,6 +407,8 @@ void keyboard(unsigned char key, int x, int y){
 			glUseProgram(program_0);
 			cam.setCameraMatrix();
 			glUseProgram(program_1);
+			cam.setCameraMatrix();
+			glUseProgram(program_box);
 			cam.setCameraMatrix();
 			glutPostRedisplay();
 		}
@@ -313,6 +425,8 @@ void keyboard(unsigned char key, int x, int y){
 			cam.setCameraMatrix();
 			glUseProgram(program_1);
 			cam.setCameraMatrix();
+			glUseProgram(program_box);
+			cam.setCameraMatrix();
 			glutPostRedisplay();
 		}
 	}
@@ -328,6 +442,9 @@ void keyboard(unsigned char key, int x, int y){
 			cam.setCameraMatrix();
 			glUseProgram(program_1);
 			cam.setCameraMatrix();
+			glUseProgram(program_box);
+			cam.setCameraMatrix();
+
 			glutPostRedisplay();
 		}
 	}
@@ -336,6 +453,8 @@ void keyboard(unsigned char key, int x, int y){
 
 
 void loadTextures(void){
+	
+
 
 	glActiveTexture(GL_TEXTURE2);
 	tex2.Load("cobblestone.jpg");
@@ -343,25 +462,33 @@ void loadTextures(void){
 
 	glActiveTexture(GL_TEXTURE0);
 	tex0.Load("cubemaplayout.png");
-	//tex0.Load("cobblestone.jpg");
 	tex0.Bind();
 
 	glActiveTexture(GL_TEXTURE1);			// Make texture1 active
 	tex1.Load("cobblestone_normal.jpg");	// Load texture from file
 	tex1.Bind();
 
+	glActiveTexture(GL_TEXTURE3);
+	texBox.Load("cobblestone.jpg");
+	texBox.Bind();
+	
 }
 
+GLuint time_unif;
 Model *pear;
 
 
 void init_objects(){
 
-	ShaderInfo pear_shader = { GL_VERTEX_SHADER, "pear_shader.vs", GL_FRAGMENT_SHADER, "pear_shader.fs" };
-	pear_program = LoadShaders(pear_shader);
+	//ShaderInfo pear_shader = { GL_VERTEX_SHADER, "pear_shader.vs", GL_FRAGMENT_SHADER, "pear_shader.fs" };
+	//pear_program = LoadShaders(pear_shader);
 
-	pear = new Model(pear_program, "Objects/pear/pear.obj", "Objects/pear/", false, false, 1);
-	pear->Draw();
+	Shader shader("pear_shader");
+	GLuint program = shader.Bind();
+
+
+	pear = new Model(pear_program, "Objects/pear/pear.obj", "Objects/pear/", true, true, 1);
+	time_unif = glGetUniformLocation(program, "time");
 }
 
 void init_camera_top(){
@@ -378,11 +505,11 @@ void init_camera_top(){
 
 	cam.setAttribLocations(Mcam_unif, Mproj_unif, gaze_unif);
 
-	cam.position = glm::vec3(0, -5, 0);
+	cam.position = glm::vec3(0, -2, 0);
 	cam.gaze = glm::vec3(0, 0, -1);
 	cam.up = glm::vec3(0, 1, 0);
 	cam.setCameraMatrix();
-	cam.setPerspectiveProjection(60, 1, -1, -5000);
+	cam.setPerspectiveProjection(60, 1, -1, -100);
 }
 
 void init_camera_bottom(){
@@ -398,15 +525,34 @@ void init_camera_bottom(){
 
 	cam.setAttribLocations(Mcam_unif, Mproj_unif, gaze_unif);
 
-	cam.position = glm::vec3(0, -5, 0);
+	cam.position = glm::vec3(0, -2, 0);
 	cam.gaze = glm::vec3(0, 0, -1);
 	cam.up = glm::vec3(0, 1, 0);
 	cam.setCameraMatrix();
 	cam.setPerspectiveProjection(60, 1, -1, -100);
 }
 
+void init_camera_box(){
+	Mcam_unif = glGetUniformLocation(program_box, "Mcam");
+	Mproj_unif = glGetUniformLocation(program_box, "Mproj");
+	gaze_unif = glGetUniformLocation(program_box, "gaze");
 
-void init_topFaces(void){
+	camPos = glGetUniformLocation(program_box, "camPos");
+
+	GLuint vnewEyePos = glGetAttribLocation(program_box, "vnewEyePosition");
+	glEnableVertexAttribArray(vnewEyePos);
+	glVertexAttribPointer(vnewEyePos, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+	cam.setAttribLocations(Mcam_unif, Mproj_unif, gaze_unif);
+
+	cam.position = glm::vec3(0, -2, 0);
+	cam.gaze = glm::vec3(0, 0, -1);
+	cam.up = glm::vec3(0, 1, 0);
+	cam.setCameraMatrix();
+	cam.setPerspectiveProjection(60, 1, -1, -100);
+}
+
+void init_topFaces(){
 
 	ShaderInfo shader_0 = { GL_VERTEX_SHADER, "shader_0.vs", GL_FRAGMENT_SHADER, "shader_0.fs" };
 	program_0 = LoadShaders(shader_0);
@@ -523,6 +669,61 @@ void init_bottomFaces()
 
 }
 
+void init_box(){
+	ShaderInfo shader_box = { GL_VERTEX_SHADER, "shader_box.vs", GL_FRAGMENT_SHADER, "shader_box.fs" };
+	program_box = LoadShaders(shader_box);
+	//Shader shader0("myshader0");
+	//program_0 = shader0.Bind();
+
+	glUseProgram(program_box);
+
+	init_camera_box();
+
+	glGenVertexArrays(1, &VAOs[smallBox]);
+	glBindVertexArray(VAOs[smallBox]);
+
+	glGenBuffers(NumBuffers, Buffers);
+
+	glBindBuffer(GL_ARRAY_BUFFER, Buffers[ArrayBuffer]);
+
+
+	//Create the buffer but don't load anything
+	glBufferData(GL_ARRAY_BUFFER,
+		sizeof(boxVertices) + sizeof(boxTexcoords),
+		NULL,
+		GL_STATIC_DRAW);
+
+	//Load the vertex data
+	glBufferSubData(GL_ARRAY_BUFFER,
+		0,
+		sizeof(boxVertices),
+		boxVertices);
+
+	//Load the colors data right after that
+	glBufferSubData(GL_ARRAY_BUFFER,
+		sizeof(boxVertices),
+		sizeof(boxTexcoords),
+		boxTexcoords);
+
+	GLuint vPosition = glGetAttribLocation(program_box, "s_vPosition");
+	glEnableVertexAttribArray(vPosition);
+	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+	GLuint vTexcoord = glGetAttribLocation(program_box, "s_vTexcoord");
+	glEnableVertexAttribArray(vTexcoord);
+	glVertexAttribPointer(vTexcoord, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(boxVertices)));
+
+	glUniform1i(glGetUniformLocation(program_box, "diffuseMap"), 0); // set the variable diffuseMap to 0 so that it uses texture0
+
+	//get the rotation matrix location in the shader
+	Mrot_unif = glGetUniformLocation(program_box, "Mrot");
+	glUniformMatrix4fv(Mrot_unif, 1, GL_FALSE, rotate_mat);
+
+	//****************END RENDER TOP 5 FACES
+
+
+}
+
 //Any time the windows is resized, this function is called.
 //The parameters passed to it are the new dimensions of the window.
 void changeViewport(int w, int h){
@@ -531,6 +732,7 @@ void changeViewport(int w, int h){
 
 //This function is called each time the window is redrawn.
 void display(){
+
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -550,6 +752,17 @@ void display(){
 
 	glBindVertexArray(VAOs[BottomFace]);
 	glDrawArrays(GL_TRIANGLES, 0, NumVerticesBot);
+
+
+	//Draw box
+	glUseProgram(program_box);
+
+	glUniform3f(camPos, cam.position.x, cam.position.y, cam.position.z);
+
+	glBindVertexArray(VAOs[smallBox]);
+	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
+
+
 
 	glFlush();
 	glutSwapBuffers();
@@ -585,11 +798,12 @@ int main(int argc, char **argv){
 
 	loadTextures();
 
-	init_objects();
+	
 
-
+	init_box();
 	init_topFaces();
 	init_bottomFaces();
+	
 
 	glutDisplayFunc(display);
 

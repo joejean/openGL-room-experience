@@ -39,6 +39,9 @@
     <ClCompile Include="tiny_obj_loader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader_1.vs">
@@ -51,6 +54,18 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="shader_0.vs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="pear_shader.fs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="pear_shader.vs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shader_box.vs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shader_box.fs">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
@@ -77,6 +92,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tiny_obj_loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="transform.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cameraobj.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

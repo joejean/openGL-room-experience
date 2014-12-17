@@ -34,7 +34,7 @@ vec3 position;
 vec3 theNormal;
 void main () {
 
-	position=s_fPosition;
+	position= s_fPosition - vec3(0,0,0);
 
 	vec4 tColor = computeColor()+spotLightColor();
 	//fColor = computeColor()+spotLightColor();
@@ -56,9 +56,11 @@ void main () {
 //compute the specular phong lighting color + diffuse lighting color
 vec4 computeColor(){
 	
-	vec4 light = vec4(0.8,0.8,0.8,1.0);
+	//vec4 light = vec4(0.4,0.4,0.4,1.0);
+	vec4 light = vec4(0,0,0,1.0);
+	
 	vec3 eyePosition = camPos;
-	vec3 lightPosition = vec3(0,10,-10); 
+	vec3 lightPosition = vec3(0,0,-110); 
 	  
 	// set new color
 	vec4 ambient = vec4(0.1,0.1, 0.1, 1);
@@ -71,7 +73,7 @@ vec4 computeColor(){
 
 	vec4 h_normal=vec4(normal,0);
 	
-	normal=(Mproj*Mcam*h_normal).xyz;
+	//normal=(Mproj*Mcam*h_normal).xyz;
 
 	normal= normalize(normal);
 

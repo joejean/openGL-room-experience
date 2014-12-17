@@ -11,6 +11,7 @@ uniform vec3 Kd;
 uniform vec3 Ks;
 uniform float shininess;
 uniform bool Kd_map_present;
+uniform vec3 camPos;
 
 out vec4 color;
 
@@ -22,12 +23,12 @@ void main(){
 
 vec4 computeColor(){
 	vec3 lightPosition = vec3(0,2,0);
-	vec3 eyePosition = vec3(0,0,-2);
+	vec3 eyePosition = camPos;
 	vec3 ambientIntensity = 0.3*vec3(1,1,1);
 	vec3 diffuseIntensity = vec3(0.9,0.9,0.9);
 	vec3 specularIntensity = vec3(0.7,0.7, 0.7);
 
-	vec3 ambient = Ka;
+	vec3 ambient = vec3(0.2, 0.2, 0.2);
 	vec3 diffuse = Kd;
 	vec3 specular = Ks;
 	float sh = 64; //shininess;

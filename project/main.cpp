@@ -38,8 +38,8 @@ GLfloat rotate_mat[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 //matrix to store the rotation from earlier
 GLfloat old_rotate_mat[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 
-int g_height = 512;
-int g_width = 512;
+int g_height = 800;
+int g_width = 600;
 
 
 
@@ -70,34 +70,37 @@ GLuint VAOs[NumVAOs];
 GLuint Buffers[NumBuffers];
 
 //dimensions for the cube
-GLfloat s = 1.5f;
+GLfloat s = 20.0f;
 
+GLfloat w = 20.0f;
+GLfloat h = 4.0f;
+GLfloat l = 10.0f;
 
 //NumVertices = number of faces * 3;
 const GLuint NumVertices = 30;
 
-GLfloat vertices[] = {
+GLfloat vertices[][3] = {
 	//front -- 123, 134
-	s,s,s,        -s,s,s,        -s,-s,s,
-	s,s,s,        -s,-s,s,        s,-s,s,
+	w, h, l, -w, h, l, -w, -h, l,
+	w, h, l, -w, -h, l, w, -h, l,
 
-//back -- 658,687
-	-s,s,-s,       s,s,-s,        s,-s,-s,
-	-s,s,-s,       s,-s,-s,      -s,-s,-s,
+	//back -- 658,687
+	-w, h, -l, w, h, -l, w, -h, -l,
+	-w, h, -l, w, -h, -l, -w, -h, -l,
 
-//left -- 267,273
-	-s,s,s,        -s,s,-s,       -s,-s,-s,
-	-s,s,s,        -s,-s,-s,      -s,-s,s,
+	//left -- 267,273
+	-w, h, l, -w, h, -l, -w, -h, -l,
+	-w, h, l, -w, -h, -l, -w, -h, l,
 
-//rgiht -- 514,548
-	s,s,-s,         s,s,s,        s,-s,s,
-	s,s,-s,         s,-s,s,       s,-s,-s,
-//top -- 562,521
-	s,s,-s,         -s,s,-s,      -s,s,s,
-	s,s,-s,         -s,s,s,       s,s,s,
-//bottom -- 437,478
-	//s,-s,s,         -s,-s,s,      -s,-s,-s,
-	//s,-s,s,         -s,-s,-s,      s,-s,-s
+	//rgiht -- 514,548
+	w, h, -l, w, h, l, w, -h, l,
+	w, h, -l, w, -h, l, w, -h, -l,
+	//top -- 562,521
+	w, h, -l, -w, h, -l, -w, h, l,
+	w, h, -l, -w, h, l, w, h, l,
+	//bottom -- 437,478
+	w, -h, l, -w, -h, l, -w, -h, -l,
+	w, -h, l, -w, -h, -l, w, -h, -l
 };
 
 GLfloat texcoords[] = {
@@ -126,10 +129,12 @@ GLfloat texcoords[] = {
 //coordinates for the bottom surface, rendered separtately from the rest
 const GLuint NumVerticesBot = 6;
 
+
 GLfloat verticesBot[] = {
-	s, -s, s, -s, -s, s, -s, -s, -s,
-	s, -s, s, -s, -s, -s, s, -s, -s
+	w, -h, l, -w, -h, l, -w, -h, -l,
+	w, -h, l, -w, -h, -l, w, -h, -l,
 };
+
 GLfloat texcoordsBot[] = {
 	0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
 	0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f
@@ -240,7 +245,6 @@ void mouseMotion(int xx, int yy){
 	cam.setCameraMatrix();
 	glutPostRedisplay();
 
-
 	glUseProgram(program_object);
 	cam.setCameraMatrix();
 	glutPostRedisplay();
@@ -252,7 +256,6 @@ void special(int key, int x, int y)
 {
 
 	float theta = 0.05f;
-
 
 	glm::vec3 old_cam_gaze = cam.gaze;
 	glm::vec3 old_cam_up = cam.up;
@@ -303,8 +306,10 @@ void special(int key, int x, int y)
 	}
 }
 
-
 void keyboard(unsigned char key, int x, int y){
+
+	glm::vec3 side = 0.1f*glm::cross(cam.gaze, cam.up);
+
 	float next_x = cam.position.x + 0.1f*cam.gaze.x;
 	float next_y = cam.position.y + 0.1f*cam.gaze.y;
 	float next_z = cam.position.z + 0.1f*cam.gaze.z;
@@ -313,13 +318,22 @@ void keyboard(unsigned char key, int x, int y){
 	float prev_y = cam.position.y - 0.1f*cam.gaze.y;
 	float prev_z = cam.position.z - 0.1f*cam.gaze.z;
 
+	float side_right_x = cam.position.x - side.x;
+	float side_right_y = cam.position.y - side.y;
+	float side_right_z = cam.position.z - side.z;
+
+	float side_left_x = cam.position.x + side.x;
+	float side_left_y = cam.position.y + side.y;
+	float side_left_z = cam.position.z + side.z;
+
 
 	if (key == 'w'){
-		if (next_x > -8.0f  && next_x < 8.0f &&
-			next_y > -8.0f  && next_y < 8.0f &&
-			next_z > -8.0f  && next_z < 8.0f
+		if (next_x > -(s - 2) && next_x < (s - 2) &&
+			next_y > -(s - 2) && next_y < (s - 2) &&
+			next_z > -(s - 2) && next_z < (s - 2)
 			){
-			cam.position += 0.1f*cam.gaze;
+			cam.position.x += 0.1f*cam.gaze.x;
+			cam.position.z += 0.1f*cam.gaze.z;
 			glUseProgram(program_0);
 			cam.setCameraMatrix();
 			glUseProgram(program_1);
@@ -328,15 +342,47 @@ void keyboard(unsigned char key, int x, int y){
 		}
 	}
 	else if (key == 's'){
-		if (prev_x > -8.0f  && prev_x < 8.0f &&
-			prev_y > -8.0f  && prev_y < 8.0f &&
-			prev_z > -8.0f  && prev_z < 8.0f
+		if (prev_x > -(s - 2) && prev_x < (s - 2) &&
+			prev_y > -(s - 2) && prev_y < (s - 2) &&
+			prev_z > -(s - 2) && prev_z < (s - 2)
 			){
-			cam.position -= 0.1f*cam.gaze;
+			cam.position.x -= 0.1f*cam.gaze.x;
+			cam.position.z -= 0.1f*cam.gaze.z;
 			glUseProgram(program_0);
 			cam.setCameraMatrix();
 			glUseProgram(program_1);
 			cam.setCameraMatrix();
+			glutPostRedisplay();
+		}
+	}
+	else if (key == 'a'){
+		if (side_right_x > -(s - 2) && side_right_x < (s - 2) &&
+			side_right_x > -(s - 2) && side_right_x < (s - 2) &&
+			side_right_x > -(s - 2) && side_right_x < (s - 2)
+			){
+
+			cam.position.x -= side.x;
+			cam.position.z -= side.z;
+			glUseProgram(program_0);
+			cam.setCameraMatrix();
+			glUseProgram(program_1);
+			cam.setCameraMatrix();
+			glutPostRedisplay();
+		}
+	}
+	else if (key == 'd'){
+		if (side_left_x > -(s - 2) && side_left_x < (s - 2) &&
+			side_left_x > -(s - 2) && side_left_x < (s - 2) &&
+			side_left_x > -(s - 2) && side_left_x < (s - 2)
+			){
+
+			cam.position.x += side.x;
+			cam.position.z += side.z;
+			glUseProgram(program_0);
+			cam.setCameraMatrix();
+			glUseProgram(program_1);
+			cam.setCameraMatrix();
+
 			glutPostRedisplay();
 		}
 	}

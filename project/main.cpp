@@ -70,7 +70,7 @@ GLuint VAOs[NumVAOs];
 GLuint Buffers[NumBuffers];
 
 //dimensions for the cube
-GLfloat s = 10.0f;
+GLfloat s = 1.5f;
 
 
 //NumVertices = number of faces * 3;
@@ -134,6 +134,64 @@ GLfloat texcoordsBot[] = {
 	0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
 	0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f
 };
+
+/*********
+Load Object Stuff
+**********/
+
+GLuint time_unif;
+
+Model *m;
+
+GLuint program_object;
+
+void init_object(void){
+
+	ShaderInfo shader_object = { GL_VERTEX_SHADER, "basicShader.vs", GL_FRAGMENT_SHADER, "basicShader.fs" };
+	program_object = LoadShaders(shader_object);
+
+	//m = new Model(program,"Objects/pear/pear.obj", "Objects/pear/", false, true, 1);
+	//m = new Model(program,"Objects/uh60/uh60.obj", "Objects/uh60/", false, true, 1);
+
+	printf("init_object");
+
+	//m = new Model(program,"Objects/Starship/Starship.obj", "Objects/Starship/", false, true, 1);
+	//m = new Model(program,"Objects/Rifle/Rifle.obj", "Objects/Rifle/", false, true, 1);
+	//m = new Model(program,"Objects/dpv/dpv.obj", "Objects/dpv/", false, true, 1);
+	//m = new Model(program,"Objects/ferrari_599gtb/ferrari_599gtb.obj", "Objects/ferrari_599gtb/", false, true, 1);
+	//m = new Model(program, "Objects/zombie/zombie.obj", "Objects/zombie/", false, true, 1);
+	m = new Model(program_object, "Objects/Swan/Swan.obj", "Objects/Swan/", false, true, 1);
+	//m = new Model(program, "Objects/Dog/ZombiDog.obj", "Objects/Dog/", false, true, 1);
+	//m = new Model(program, "Objects/Nurseknife/Nurse.obj", "Objects/Nurseknife/", false, true,10);
+	//m = new Model(program, "Objects/Policeman/Policeman.obj", "Objects/Policeman/", false, true,1);
+
+
+	time_unif = glGetUniformLocation(program_object, "time");
+
+}
+
+void display_object(void){
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	m->Draw();
+
+	GLint64 time;
+	glGetInteger64v(GL_TIMESTAMP, &time);
+	glUniform1f(time_unif, (float)time / 1000000000.0f);
+
+	glFlush();
+	glutSwapBuffers();
+	glutPostRedisplay();
+}
+
+
+/********
+END LOAD OBJECT STUFF
+*********/
+
+
+
+
+
 
 
 void mouse(int button, int state, int xx, int yy){
@@ -290,16 +348,15 @@ void keyboard(unsigned char key, int x, int y){
 
 void loadTextures(void){
 
-	glActiveTexture(GL_TEXTURE2);
+	glActiveTexture(GL_TEXTURE19);
 	tex2.Load("cobblestone.jpg");
 	tex2.Bind();
 
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE5);
 	tex0.Load("cubemaplayout.png");
-	//tex0.Load("cobblestone.jpg");
 	tex0.Bind();
 
-	glActiveTexture(GL_TEXTURE1);			// Make texture1 active
+	glActiveTexture(GL_TEXTURE12);			// Make texture1 active
 	tex1.Load("cobblestone_normal.jpg");	// Load texture from file
 	tex1.Bind();
 
@@ -307,6 +364,7 @@ void loadTextures(void){
 
 void init_camera_top(){
 	Mcam_unif = glGetUniformLocation(program_0, "Mcam");
+	printf("Mcam_top: %d",Mcam_unif);
 	Mproj_unif = glGetUniformLocation(program_0, "Mproj");
 	gaze_unif = glGetUniformLocation(program_0, "gaze");
 
@@ -323,11 +381,13 @@ void init_camera_top(){
 	cam.gaze = glm::vec3(0, 0, -1);
 	cam.up = glm::vec3(0, 1, 0);
 	cam.setCameraMatrix();
-	cam.setPerspectiveProjection(60, 1, -1, -5000);
+	cam.setPerspectiveProjection(60, 1, -0.1, -5000);
 }
 
 void init_camera_bottom(){
 	Mcam_unif = glGetUniformLocation(program_1, "Mcam");
+	printf("Mcam_bottom: %d", Mcam_unif);
+
 	Mproj_unif = glGetUniformLocation(program_1, "Mproj");
 	gaze_unif = glGetUniformLocation(program_1, "gaze");
 
@@ -391,7 +451,7 @@ void init_topFaces(void){
 	glEnableVertexAttribArray(vTexcoord);
 	glVertexAttribPointer(vTexcoord, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vertices)));
 
-	glUniform1i(glGetUniformLocation(program_0, "diffuseMap"), 0); // set the variable diffuseMap to 0 so that it uses texture0
+	glUniform1i(glGetUniformLocation(program_0, "diffuseMap"), 0*7+5); // set the variable diffuseMap to 0 so that it uses texture0
 
 	//get the rotation matrix location in the shader
 	Mrot_unif = glGetUniformLocation(program_0, "Mrot");
@@ -450,8 +510,9 @@ void init_bottomFaces()
 	glEnableVertexAttribArray(vTexcoord);
 	glVertexAttribPointer(vTexcoord, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(verticesBot)));
 
-	glUniform1i(glGetUniformLocation(program_1, "diffuseMap"), 2); // set the variable diffuseMap to 0 so that it uses texture0
-	glUniform1i(glGetUniformLocation(program_1, "normalMap"), 1); // set the variable normalMap to 1 so that it uses texture1
+	glUniform1i(glGetUniformLocation(program_1, "diffuseMap"), 2*7+5); // set the variable diffuseMap to 2 so that it uses texture2
+	//glUniform1i(glGetUniformLocation(program_1, "normalMap"), 1*7+5); // set the variable normalMap to 1 so that it uses texture1
+	glUniform1i(glGetUniformLocation(program_1, "normalMap"), 12); // set the variable normalMap to 1 so that it uses texture1
 
 
 	//get the rotation matrix location in the shader
@@ -491,6 +552,16 @@ void display(){
 	glBindVertexArray(VAOs[BottomFace]);
 	glDrawArrays(GL_TRIANGLES, 0, NumVerticesBot);
 
+
+
+	glUseProgram(program_object);
+
+	m->Draw();
+
+	GLint64 time;
+	glGetInteger64v(GL_TIMESTAMP, &time);
+	glUniform1f(time_unif, (float)time / 1000000000.0f);
+
 	glFlush();
 	glutSwapBuffers();
 }
@@ -520,11 +591,12 @@ int main(int argc, char **argv){
 	glDepthFunc(GL_LESS);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
 	loadTextures();
 
 	init_topFaces();
 	init_bottomFaces();
+
+	init_object();
 
 	glutDisplayFunc(display);
 
@@ -533,6 +605,7 @@ int main(int argc, char **argv){
 
 	glutMouseFunc(mouse);
 	glutMotionFunc(mouseMotion);
+
 
 	GLenum err = glewInit();		 //Very important! This initializes the entry points 
 	if(GLEW_OK!=err){				 //in the OpenGL driver so we can call all the functions 

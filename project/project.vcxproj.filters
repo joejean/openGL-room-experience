@@ -33,6 +33,12 @@
     <ClCompile Include="shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tiny_obj_loader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader_1.vs">
@@ -45,6 +51,12 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="shader_0.vs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\..\Loading+Objects\project\basicShader.fs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\..\Loading+Objects\project\basicShader.vs">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
@@ -65,6 +77,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tiny_obj_loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

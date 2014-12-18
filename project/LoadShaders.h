@@ -19,3 +19,4 @@ struct ShaderInfo {
 
 GLuint LoadShaders(ShaderInfo shaderInfo);
 const char* getShaderProgram(const char *filePath, string &shaderProgramText);
+void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string& errorMessage);

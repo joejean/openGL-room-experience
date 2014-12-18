@@ -87,9 +87,11 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="LoadShaders.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="model.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="texture.cpp" />
+    <ClCompile Include="tiny_obj_loader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -99,6 +101,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\Loading+Objects\project\basicShader.fs" />
+    <None Include="..\..\..\Loading+Objects\project\basicShader.vs" />
     <None Include="shader_0.fs" />
     <None Include="shader_1.fs" />
     <None Include="shader_0.vs" />
@@ -108,9 +112,11 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="includes.h" />
     <ClInclude Include="LoadShaders.h" />
+    <ClInclude Include="model.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="texture.h" />
+    <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

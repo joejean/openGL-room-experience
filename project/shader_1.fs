@@ -44,8 +44,6 @@ void main () {
 	l=pow(l,0.1);
 
 	fColor=vec4(tColor.xyz/l,1);
-	
-	
 
 	//fColor=spotLightColor();
 	//fColor = computeColor();
@@ -67,13 +65,17 @@ vec4 computeColor(){
 	vec4 normalMapColor = texture(normalMap, s_fTexcoord); // Get the color from texture map 1  
 	vec3 normal = 2*normalMapColor.xyz - vec3(1,1,1);      // convert the color to normal vector   
 	//theNormal=normal;
-	normal.z = -normal.z;                                  // invert z direction since we are using Normalized Device Coordinates 
+
 
 	vec4 h_normal=vec4(normal,0);
 	
-	normal=(Mproj*Mcam*h_normal).xyz;
+	//normal=(transpose(inverse(Mproj*Mcam))*h_normal).xyz;
+
+    normal=(Mproj*Mcam*h_normal).xyz;
+
 
 	normal= normalize(normal);
+    normal.z = -normal.z;                                  // invert z direction since we are using Normalized Device Coordinates 
 
 
 	//normal=vec3(0,1,0);
@@ -87,10 +89,9 @@ vec4 computeColor(){
 	vec3 halfvector = normalize(dirToEye+dirToLight);
 	float cosSigma = dot(halfvector, normal);
 	float cosTheta = clamp(dot(normal, dirToLight),0,1);
-	return ambient + diffuseColor*cosTheta + specular*pow(cosSigma,shininess);
+	return ambient*diffuseColor + diffuseColor*cosTheta + specular*pow(cosSigma,shininess);
+    //return vec4(0,0,0,1);
 }
-
-
 
 vec4 spotLightColor(){
 	

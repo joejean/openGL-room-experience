@@ -1,6 +1,5 @@
 #include "LoadShaders.h"
 
-void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string& errorMessage);
 
 GLuint LoadShaders(ShaderInfo shaderInfo)
 {
@@ -16,7 +15,8 @@ GLuint LoadShaders(ShaderInfo shaderInfo)
 	glShaderSource(vertexShader, 1, &text, NULL);
 	glCompileShader(vertexShader);
 
-	CheckShaderError(vertexShader, GL_COMPILE_STATUS, false, "Error compiling shader!");
+	//added from the shader.cpp
+	CheckShaderError(vertexShader, GL_COMPILE_STATUS, false, "Error compiling vertexshader!");
 
 	// load and compile fragment shader
 	string fstext;
@@ -24,8 +24,8 @@ GLuint LoadShaders(ShaderInfo shaderInfo)
 	glShaderSource(fragmentShader, 1, &text, NULL);
 	glCompileShader(fragmentShader);
 
-
-	CheckShaderError(fragmentShader, GL_COMPILE_STATUS, false, "Error compiling shader!");
+	//added from the shader.cpp
+	CheckShaderError(fragmentShader, GL_COMPILE_STATUS, false, "Error compiling fragmentshader!");
 
 	// attach the vertex and fragment shaders to the program
 	glAttachShader(program, vertexShader);

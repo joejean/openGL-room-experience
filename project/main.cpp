@@ -176,7 +176,7 @@ void display_object(void){
 
 	GLint64 time;
 	glGetInteger64v(GL_TIMESTAMP, &time);
-	glUniform1f(time_unif, (float)time / 1000000000.0f);
+	//glUniform1f(time_unif, (float)time / 1000000000.0f);
 
 	glFlush();
 	glutSwapBuffers();
@@ -187,9 +187,6 @@ void display_object(void){
 /********
 END LOAD OBJECT STUFF
 *********/
-
-
-
 
 
 
@@ -243,8 +240,9 @@ void mouseMotion(int xx, int yy){
 	cam.setCameraMatrix();
 	glutPostRedisplay();
 
-	
 
+	glUseProgram(program_object);
+	cam.setCameraMatrix();
 	glutPostRedisplay();
 }
 
@@ -535,6 +533,7 @@ void display(){
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glDepthMask(false);
 	//Draw Topfaces
 	glUseProgram(program_0);
 
@@ -552,7 +551,7 @@ void display(){
 	glBindVertexArray(VAOs[BottomFace]);
 	glDrawArrays(GL_TRIANGLES, 0, NumVerticesBot);
 
-
+	glDepthMask(true);
 
 	glUseProgram(program_object);
 
@@ -560,7 +559,7 @@ void display(){
 
 	GLint64 time;
 	glGetInteger64v(GL_TIMESTAMP, &time);
-	glUniform1f(time_unif, (float)time / 1000000000.0f);
+//	glUniform1f(time_unif, (float)time / 1000000000.0f);
 
 	glFlush();
 	glutSwapBuffers();

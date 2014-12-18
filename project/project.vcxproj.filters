@@ -53,10 +53,10 @@
     <None Include="shader_0.vs">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\..\..\Loading+Objects\project\basicShader.fs">
+    <None Include="basicShader.vs">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\..\..\Loading+Objects\project\basicShader.vs">
+    <None Include="basicShader.fs">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

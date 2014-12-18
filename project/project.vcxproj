@@ -101,8 +101,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="basicShader.fs" />
-    <None Include="basicShader.vs" />
+    <None Include="objectShader.fs" />
+    <None Include="objectShader.vs" />
     <None Include="shader_0.fs" />
     <None Include="shader_1.fs" />
     <None Include="shader_0.vs" />

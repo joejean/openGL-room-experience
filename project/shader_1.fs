@@ -99,7 +99,7 @@ vec4 spotLightColor(){
 
 	float angle = 3.14159/10;
 	
-	vec3 lightPosition = camPos; 	
+	vec3 lightPosition = camPos; 
 	vec3 dirToLight = normalize(lightPosition - position);
 
 	float cosAngleFromAxis = dot(-dirToLight, axis);

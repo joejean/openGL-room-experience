@@ -1,5 +1,8 @@
 #version 330 core
 
+uniform mat4 Mcam;
+uniform mat4 Mproj;
+
 //The rotation matrix -- to be deleted
 uniform mat4 Mrot_1;
 uniform mat4 Mrot;
@@ -14,8 +17,6 @@ out vec2 s_fTexcoord;
 //need to send out the vertex position for fragment shader to do lighting
 out vec3 s_fPosition;
 
-uniform mat4 Mcam;
-uniform mat4 Mproj;
 
 
 void main () {

@@ -54,6 +54,9 @@ GLuint program_0;
 GLuint program_1;
 
 
+GLuint program_object;
+
+
 Texture tex0,tex1,tex2;
 
 /**********COPY CODE************/
@@ -70,8 +73,11 @@ GLuint VAOs[NumVAOs];
 GLuint Buffers[NumBuffers];
 
 //dimensions for the cube
-GLfloat s = 1.5f;
+GLfloat s = 10.0f;
 
+
+GLfloat nearPlane = -0.1;
+GLfloat farPlane = -5000;
 
 //NumVertices = number of faces * 3;
 const GLuint NumVertices = 30;
@@ -143,17 +149,22 @@ GLuint time_unif;
 
 Model *m;
 
-GLuint program_object;
+
+void init_camera_object();
 
 void init_object(void){
 
-	ShaderInfo shader_object = { GL_VERTEX_SHADER, "basicShader.vs", GL_FRAGMENT_SHADER, "basicShader.fs" };
+	ShaderInfo shader_object = { GL_VERTEX_SHADER, "objectShader.vs", GL_FRAGMENT_SHADER, "objectShader.fs" };
 	program_object = LoadShaders(shader_object);
+
+
+	printf("init_object");
+
+	init_camera_object();
 
 	//m = new Model(program,"Objects/pear/pear.obj", "Objects/pear/", false, true, 1);
 	//m = new Model(program,"Objects/uh60/uh60.obj", "Objects/uh60/", false, true, 1);
 
-	printf("init_object");
 
 	//m = new Model(program,"Objects/Starship/Starship.obj", "Objects/Starship/", false, true, 1);
 	//m = new Model(program,"Objects/Rifle/Rifle.obj", "Objects/Rifle/", false, true, 1);
@@ -166,7 +177,6 @@ void init_object(void){
 	//m = new Model(program, "Objects/Policeman/Policeman.obj", "Objects/Policeman/", false, true,1);
 
 
-	time_unif = glGetUniformLocation(program_object, "time");
 
 }
 
@@ -174,8 +184,8 @@ void display_object(void){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m->Draw();
 
-	GLint64 time;
-	glGetInteger64v(GL_TIMESTAMP, &time);
+	//GLint64 time;
+	//glGetInteger64v(GL_TIMESTAMP, &time);
 	//glUniform1f(time_unif, (float)time / 1000000000.0f);
 
 	glFlush();
@@ -236,13 +246,19 @@ void mouseMotion(int xx, int yy){
 	glUseProgram(program_0);
 	cam.setCameraMatrix();
 
+	cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
+
 	glUseProgram(program_1);
 	cam.setCameraMatrix();
+	cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
+
 	glutPostRedisplay();
 
 
 	glUseProgram(program_object);
 	cam.setCameraMatrix();
+	cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
+
 	glutPostRedisplay();
 }
 
@@ -269,6 +285,13 @@ void special(int key, int x, int y)
 		glUseProgram(program_1);
 		cam.setCameraMatrix();
 		glutPostRedisplay();
+
+		glUseProgram(program_object);
+		cam.setCameraMatrix();
+		cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
+
+		glutPostRedisplay();
+
 		break;
 
 	case GLUT_KEY_DOWN:
@@ -280,6 +303,13 @@ void special(int key, int x, int y)
 		glUseProgram(program_1);
 		cam.setCameraMatrix();
 		glutPostRedisplay();
+
+		glUseProgram(program_object);
+		cam.setCameraMatrix();
+		cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
+
+		glutPostRedisplay();
+
 		break;
 
 	case GLUT_KEY_LEFT:
@@ -289,6 +319,12 @@ void special(int key, int x, int y)
 		glUseProgram(program_1);
 		cam.setCameraMatrix();
 		glutPostRedisplay();
+		glUseProgram(program_object);
+		cam.setCameraMatrix();
+		cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
+
+		glutPostRedisplay();
+
 		break;
 
 	case GLUT_KEY_RIGHT:
@@ -299,6 +335,12 @@ void special(int key, int x, int y)
 		glUseProgram(program_1);
 		cam.setCameraMatrix();
 		glutPostRedisplay();
+		glUseProgram(program_object);
+		cam.setCameraMatrix();
+		cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
+
+		glutPostRedisplay();
+
 		break;
 	}
 }
@@ -325,6 +367,12 @@ void keyboard(unsigned char key, int x, int y){
 			glUseProgram(program_1);
 			cam.setCameraMatrix();
 			glutPostRedisplay();
+			glUseProgram(program_object);
+			cam.setCameraMatrix();
+			cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
+
+			glutPostRedisplay();
+
 		}
 	}
 	else if (key == 's'){
@@ -338,6 +386,12 @@ void keyboard(unsigned char key, int x, int y){
 			glUseProgram(program_1);
 			cam.setCameraMatrix();
 			glutPostRedisplay();
+
+			glUseProgram(program_object);
+			cam.setCameraMatrix();
+			cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
+			glutPostRedisplay();
+
 		}
 	}
 }
@@ -391,9 +445,9 @@ void init_camera_bottom(){
 
 	camPos = glGetUniformLocation(program_1, "camPos");
 
-	GLuint vnewEyePos = glGetAttribLocation(program_1, "vnewEyePosition");
-	glEnableVertexAttribArray(vnewEyePos);
-	glVertexAttribPointer(vnewEyePos, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+	//GLuint vnewEyePos = glGetAttribLocation(program_1, "vnewEyePosition");
+	//glEnableVertexAttribArray(vnewEyePos);
+	//glVertexAttribPointer(vnewEyePos, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 
 	cam.setAttribLocations(Mcam_unif, Mproj_unif, gaze_unif);
 
@@ -401,8 +455,59 @@ void init_camera_bottom(){
 	cam.gaze = glm::vec3(0, 0, -1);
 	cam.up = glm::vec3(0, 1, 0);
 	cam.setCameraMatrix();
-	cam.setPerspectiveProjection(60, 1, -1, -100);
+	cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
 }
+
+void init_camera_object(){
+
+
+//	Mcam_unif = glGetUniformLocation(program_object, "Mcam");
+	Mcam_unif = glGetUniformLocation(program_object, "Mcam");
+
+
+	printf("Mcam_object: %d", Mcam_unif);
+
+	time_unif = glGetUniformLocation(program_object, "time");
+	printf("time_object: %d", time_unif);
+
+//	time_unif = glGetUniformLocation(program_object, "Mcam");
+//	printf("Mcam_object_by_time: %d", time_unif);
+
+
+	Mproj_unif = glGetUniformLocation(program_object, "Mproj");
+	
+	printf("Mproj_unif_object: %d", Mproj_unif);
+
+	
+	gaze_unif = glGetUniformLocation(program_object, "gaze");
+
+	camPos = glGetUniformLocation(program_object, "camPos");
+
+	//GLuint vnewEyePos = glGetAttribLocation(program_object, "vnewEyePosition");
+
+	glUseProgram(program_object);
+
+	//glEnableVertexAttribArray(vnewEyePos);
+	//glVertexAttribPointer(vnewEyePos, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+	//cam.setAttribLocations(Mcam_unif, Mproj_unif, gaze_unif);
+
+	//cam.position = glm::vec3(0, 0, 0);
+	//cam.gaze = glm::vec3(0, 0, -1);
+	//cam.up = glm::vec3(0, 1, 0);
+	cam.setCameraMatrix();
+	cam.setPerspectiveProjection(60, 1, -1, -100);
+	
+	/*
+	glm::vec3 theCamPos;
+	GLfloat theCamPosX=1.0;
+	GLfloat *theCamPosXPointer;
+	theCamPosXPointer = &theCamPosX;
+	glGetUniformfv(program_object, glGetUniformLocation(program_object, "camPos"), theCamPosXPointer);
+	printf("f%",*theCamPosXPointer);
+	*/	
+}
+
 
 void init_topFaces(void){
 

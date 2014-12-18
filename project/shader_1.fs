@@ -54,12 +54,12 @@ void main () {
 //compute the specular phong lighting color + diffuse lighting color
 vec4 computeColor(){
 	
-	vec4 light = vec4(0.8,0.8,0.8,1.0);
+	vec4 light = vec4(1,1,1,1.0);
 	vec3 eyePosition = camPos;
-	vec3 lightPosition = vec3(0,10,-10); 
+	vec3 lightPosition = vec3(0,2,0); 
 	  
 	// set new color
-	vec4 ambient = vec4(0.1,0.1, 0.1, 1);
+	vec4 ambient = vec4(0.3,0.3, 0.3, 1);
 
 	diffuseColor = texture(diffuseMap, s_fTexcoord);       // Get the diffuse color from texture map 0
 	vec4 normalMapColor = texture(normalMap, s_fTexcoord); // Get the color from texture map 1  
@@ -78,7 +78,7 @@ vec4 computeColor(){
     normal.z = -normal.z;                                  // invert z direction since we are using Normalized Device Coordinates 
 
 
-	//normal=vec3(0,1,0);
+	normal=vec3(0,1,0);
 	theNormal=normal;
 	
 	vec4 specular = vec4(1,1,1,1);

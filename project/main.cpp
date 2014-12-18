@@ -14,7 +14,6 @@ using namespace std;
 #define EPS 0.000000001
 #define PI 3.14159265359
 
-//Assimp::Importer importer;
 
 GLuint Mcam_unif;
 GLuint Mproj_unif;
@@ -388,9 +387,13 @@ void keyboard(unsigned char key, int x, int y){
 	}
 }
 
-
+Texture wall_bump;
 
 void loadTextures(void){
+
+	glActiveTexture(GL_TEXTURE20);
+	wall_bump.Load("cubemaplayout_normal.png");
+	wall_bump.Bind();
 
 	glActiveTexture(GL_TEXTURE19);
 	tex2.Load("cobblestone.jpg");
@@ -496,6 +499,7 @@ void init_topFaces(void){
 	glVertexAttribPointer(vTexcoord, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vertices)));
 
 	glUniform1i(glGetUniformLocation(program_0, "diffuseMap"), 0*7+5); // set the variable diffuseMap to 0 so that it uses texture0
+	glUniform1i(glGetUniformLocation(program_1, "normalMap"), 20); // set the variable normalMap to 1 so that it uses texture1
 
 	//get the rotation matrix location in the shader
 	Mrot_unif = glGetUniformLocation(program_0, "Mrot");

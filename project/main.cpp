@@ -52,6 +52,8 @@ GLuint Mrot_unif_1;//location of the Mrot in shader for bottom
 GLuint program_0;
 GLuint program_1;
 
+int counter = 0;
+
 
 Texture tex0,tex1,tex2;
 
@@ -149,10 +151,15 @@ Model *m;
 
 GLuint program_object;
 
+GLfloat xvalue;
+
 void init_object(void){
 
 	ShaderInfo shader_object = { GL_VERTEX_SHADER, "basicShader.vs", GL_FRAGMENT_SHADER, "basicShader.fs" };
 	program_object = LoadShaders(shader_object);
+
+
+
 
 	//m = new Model(program,"Objects/pear/pear.obj", "Objects/pear/", false, true, 1);
 	//m = new Model(program,"Objects/uh60/uh60.obj", "Objects/uh60/", false, true, 1);
@@ -169,7 +176,7 @@ void init_object(void){
 	//m = new Model(program, "Objects/Nurseknife/Nurse.obj", "Objects/Nurseknife/", false, true,10);
 	//m = new Model(program, "Objects/Policeman/Policeman.obj", "Objects/Policeman/", false, true,1);
 
-
+	xvalue = glGetUniformLocation(program_object, "x");
 	time_unif = glGetUniformLocation(program_object, "time");
 
 }
@@ -578,6 +585,7 @@ void changeViewport(int w, int h){
 	glViewport(0,0,w,h);
 }
 
+
 //This function is called each time the window is redrawn.
 void display(){
 
@@ -605,11 +613,12 @@ void display(){
 
 	glUseProgram(program_object);
 
-	m->Draw();
+	
 
 	GLint64 time;
 	glGetInteger64v(GL_TIMESTAMP, &time);
-//	glUniform1f(time_unif, (float)time / 1000000000.0f);
+	glUniform1f(time_unif, (float)time / 1000000000.0f);
+	m->Draw();
 
 	glFlush();
 	glutSwapBuffers();
@@ -626,7 +635,7 @@ int main(int argc, char **argv){
 	glutInitContextVersion(3, 0);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 
-	glutCreateWindow("Rock is the Daady");
+	glutCreateWindow("Walking Dead, Flaoting Car");
 
 
 	glewExperimental = GL_TRUE;

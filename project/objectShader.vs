@@ -34,12 +34,14 @@ out vec3 s_fposition;
 vec4 tPosition;
 mat4 Tmat;
 
+float scalar=1;
+
 void main()
 {
 	mat4 Tmat;//translation matrix
-	Tmat[0][0]=1;
-	Tmat[1][1]=1;
-	Tmat[2][2]=1;
+	Tmat[0][0]=scalar;
+	Tmat[1][1]=scalar;
+	Tmat[2][2]=scalar;
 	Tmat[3][3]=1;
 	Tmat[3][1]=-5;
 
@@ -54,7 +56,7 @@ void main()
 	tPosition= position;
 
 	float t = mod(time,10)/10; t*=2*3.14159;
-	//mat3 M = mat3( cos(t), 0 , sin(t), 0,  1,  0, -sin(t), 0,  cos(t) );
+	mat4 M = mat4( cos(t), 0 , sin(t),0, 0,  1,  0,0, -sin(t), 0,  cos(t),0,0,0,0,1 );
 
 //	position0 = M*position;
 	
@@ -66,12 +68,13 @@ void main()
 
 	//normal0 = normalize(M*normal).xyz;
 	//normal0 =(Mproj*Mcam*normal).xyz;
-	normal0 = (Mproj*Mcam*normal).xyz;
+	normal0 = (Mproj*Mcam*Tmat*normal).xyz;
 
 	texCoord0 = texCoord;
 
-	//gl_Position = Mproj*Mcam*position;
+	//gl_Position = Mproj*Mcam*tPosition;
 	//gl_Position = position;
-	gl_Position =  Mproj*Mcam*Tmat*tPosition;
-		
+
+	gl_Position =  Mproj*Mcam*Tmat*M*tPosition;
+
 }

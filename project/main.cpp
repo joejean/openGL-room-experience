@@ -55,9 +55,10 @@ GLuint program_1;
 
 
 GLuint program_object;
+GLuint program_box;
 
 
-Texture tex0,tex1,tex2;
+Texture tex0,tex1,tex2,tex3,texBox;
 
 /**********COPY CODE************/
 
@@ -66,22 +67,76 @@ Texture tex0,tex1,tex2;
 
 /****************COPY CODE*****************************/
 
-enum VAO_IDs { TopFaces,BottomFace, NumVAOs };
+enum VAO_IDs { TopFaces,BottomFace,smallBox, NumVAOs };
 enum Buffer_IDs { ArrayBuffer, NumBuffers };
 
 GLuint VAOs[NumVAOs];
 GLuint Buffers[NumBuffers];
 
 //dimensions for the cube
-GLfloat s = 10.0f;
+//GLfloat s = 5.0f;
 
 
 GLfloat nearPlane = -0.1;
 GLfloat farPlane = -5000;
 
+GLfloat boxSize = 10.0f;
+
+GLfloat boxVertices[] = {
+	//front -- 123, 134
+	boxSize, boxSize, boxSize, -boxSize, boxSize, boxSize, -boxSize, -boxSize, boxSize,
+	boxSize, boxSize, boxSize, -boxSize, -boxSize, boxSize, boxSize, -boxSize, boxSize,
+
+	//back -- 658,687
+	-boxSize, boxSize, -boxSize, boxSize, boxSize, -boxSize, boxSize, -boxSize, -boxSize,
+	-boxSize, boxSize, -boxSize, boxSize, -boxSize, -boxSize, -boxSize, -boxSize, -boxSize,
+
+	//left -- 267,273
+	-boxSize, boxSize, boxSize, -boxSize, boxSize, -boxSize, -boxSize, -boxSize, -boxSize,
+	-boxSize, boxSize, boxSize, -boxSize, -boxSize, -boxSize, -boxSize, -boxSize, boxSize,
+
+	//rgiht -- 514,548
+	boxSize, boxSize, -boxSize, boxSize, boxSize, boxSize, boxSize, -boxSize, boxSize,
+	boxSize, boxSize, -boxSize, boxSize, -boxSize, boxSize, boxSize, -boxSize, -boxSize,
+	//top -- 562,521
+	boxSize, boxSize, -boxSize, -boxSize, boxSize, -boxSize, -boxSize, boxSize, boxSize,
+	boxSize, boxSize, -boxSize, -boxSize, boxSize, boxSize, boxSize, boxSize, boxSize,
+
+	//bottom -- 437,478
+	boxSize, -boxSize, boxSize, -boxSize, -boxSize, boxSize, -boxSize, -boxSize, -boxSize,
+	boxSize, -boxSize, boxSize, -boxSize, -boxSize, -boxSize, boxSize, -boxSize, -boxSize
+};
+
+
+GLfloat boxTexcoords[] = {
+	//front -- 123, 134
+	1 / 2.0f, 1 / 3.0f, 1 / 4.0f, 1 / 3.0f, 1 / 4.0f, 2 / 3.0f,
+	1 / 2.0f, 1 / 3.0f, 1 / 4.0f, 2 / 3.0f, 1 / 2.0f, 2 / 3.0f,
+	//back -- 658,687
+	1.0f, 1 / 3.0f, 3 / 4.0f, 1 / 3.0f, 3 / 4.0f, 2 / 3.0f,
+	1.0f, 1 / 3.0f, 3 / 4.0f, 2 / 3.0f, 1.0f, 2 / 3.0f,
+
+	//left -- 267,273
+	1 / 4.0f, 1 / 3.0f, 0.0f, 1 / 3.0f, 0.0f, 2 / 3.0f,
+	1 / 4.0f, 1 / 3.0f, 0.0f, 2 / 3.0f, 1 / 4.0f, 2 / 3.0f,
+	//rgiht -- 514,548
+	3 / 4.0f, 1 / 3.0f, 1 / 2.0f, 1 / 3.0f, 1 / 2.0f, 2 / 3.0f,
+	3 / 4.0f, 1 / 3.0f, 1 / 2.0f, 2 / 3.0f, 3 / 4.0f, 2 / 3.0f,
+	//top -- 562,521
+	1 / 2.0f, 0.0f, 1 / 4.0f, 0.0f, 1 / 4.0f, 1 / 3.0f,
+	1 / 2.0f, 0.0f, 1 / 4.0f, 1 / 3.0f, 1 / 2.0f, 1 / 3.0f,
+	//bottom -- 437,478
+	1 / 2.0f, 2 / 3.0f, 1 / 4.0f, 2 / 3.0f, 1 / 4.0f, 1.0f,
+	1 / 2.0f, 2 / 3.0f, 1 / 4.0f, 1.0f, 1 / 2.0f, 1.0f
+};
+
+
+
+
 //NumVertices = number of faces * 3;
 const GLuint NumVertices = 30;
 
+/*
 GLfloat vertices[] = {
 	//front -- 123, 134
 	s,s,s,        -s,s,s,        -s,-s,s,
@@ -141,6 +196,78 @@ GLfloat texcoordsBot[] = {
 	0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f
 };
 
+*/
+
+GLfloat s = 20.0f;
+
+GLfloat w = 20.0f;
+GLfloat h = 4.0f;
+GLfloat l = 20.0f;
+
+//NumVertices = number of faces * 3;
+//const GLuint NumVertices = 30;
+
+GLfloat vertices[][3] = {
+	//front -- 123, 134
+	w, h, l, -w, h, l, -w, -h, l,
+	w, h, l, -w, -h, l, w, -h, l,
+
+	//back -- 658,687
+	-w, h, -l, w, h, -l, w, -h, -l,
+	-w, h, -l, w, -h, -l, -w, -h, -l,
+
+	//left -- 267,273
+	-w, h, l, -w, h, -l, -w, -h, -l,
+	-w, h, l, -w, -h, -l, -w, -h, l,
+
+	//rgiht -- 514,548
+	w, h, -l, w, h, l, w, -h, l,
+	w, h, -l, w, -h, l, w, -h, -l,
+	//top -- 562,521
+	w, h, -l, -w, h, -l, -w, h, l,
+	w, h, -l, -w, h, l, w, h, l,
+	//bottom -- 437,478
+	w, -h, l, -w, -h, l, -w, -h, -l,
+	w, -h, l, -w, -h, -l, w, -h, -l
+};
+
+GLfloat texcoords[] = {
+	//front -- 123, 134
+	1 / 2.0f, 1 / 3.0f, 1 / 4.0f, 1 / 3.0f, 1 / 4.0f, 2 / 3.0f,
+	1 / 2.0f, 1 / 3.0f, 1 / 4.0f, 2 / 3.0f, 1 / 2.0f, 2 / 3.0f,
+	//back -- 658,687
+	1.0f, 1 / 3.0f, 3 / 4.0f, 1 / 3.0f, 3 / 4.0f, 2 / 3.0f,
+	1.0f, 1 / 3.0f, 3 / 4.0f, 2 / 3.0f, 1.0f, 2 / 3.0f,
+
+	//left -- 267,273
+	1 / 4.0f, 1 / 3.0f, 0.0f, 1 / 3.0f, 0.0f, 2 / 3.0f,
+	1 / 4.0f, 1 / 3.0f, 0.0f, 2 / 3.0f, 1 / 4.0f, 2 / 3.0f,
+	//rgiht -- 514,548
+	3 / 4.0f, 1 / 3.0f, 1 / 2.0f, 1 / 3.0f, 1 / 2.0f, 2 / 3.0f,
+	3 / 4.0f, 1 / 3.0f, 1 / 2.0f, 2 / 3.0f, 3 / 4.0f, 2 / 3.0f,
+	//top -- 562,521
+	1 / 2.0f, 0.0f, 1 / 4.0f, 0.0f, 1 / 4.0f, 1 / 3.0f,
+	1 / 2.0f, 0.0f, 1 / 4.0f, 1 / 3.0f, 1 / 2.0f, 1 / 3.0f,
+	//bottom -- 437,478
+	//1/2.0f, 2/3.0f,        1/4.0f, 2/3.0f,     1/4.0f, 1.0f,
+	//1/2.0f, 2/3.0f,        1/4.0f, 1.0f,       1/2.0f, 1.0f
+};
+
+
+//coordinates for the bottom surface, rendered separtately from the rest
+const GLuint NumVerticesBot = 6;
+
+
+GLfloat verticesBot[] = {
+	w, -h, l, -w, -h, l, -w, -h, -l,
+	w, -h, l, -w, -h, -l, w, -h, -l,
+};
+
+GLfloat texcoordsBot[] = {
+	0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+	0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f
+};
+
 /*********
 Load Object Stuff
 **********/
@@ -151,6 +278,62 @@ Model *m;
 
 
 void init_camera_object();
+void init_camera_box();
+
+void init_box(){
+
+	ShaderInfo shader_box = { GL_VERTEX_SHADER, "shader_0.vs", GL_FRAGMENT_SHADER, "shader_0.fs" };
+	program_box = LoadShaders(shader_box);
+
+
+	glUseProgram(program_box);
+
+	//init_camera_box();
+
+	glGenVertexArrays(1, &VAOs[smallBox]);
+	glBindVertexArray(VAOs[smallBox]);
+
+	glGenBuffers(NumBuffers, Buffers);
+
+	glBindBuffer(GL_ARRAY_BUFFER, Buffers[ArrayBuffer]);
+
+
+	//Create the buffer but don't load anything
+	glBufferData(GL_ARRAY_BUFFER,
+		sizeof(boxVertices) + sizeof(boxTexcoords),
+		NULL,
+		GL_STATIC_DRAW);
+
+	//Load the vertex data
+	glBufferSubData(GL_ARRAY_BUFFER,
+		0,
+		sizeof(boxVertices),
+		boxVertices);
+
+	//Load the colors data right after that
+	glBufferSubData(GL_ARRAY_BUFFER,
+		sizeof(boxVertices),
+		sizeof(boxTexcoords),
+		boxTexcoords);
+
+	GLuint vPosition = glGetAttribLocation(program_box, "s_vPosition");
+	glEnableVertexAttribArray(vPosition);
+	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+	GLuint vTexcoord = glGetAttribLocation(program_box, "s_vTexcoord");
+	glEnableVertexAttribArray(vTexcoord);
+	glVertexAttribPointer(vTexcoord, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(boxVertices)));
+
+
+	//! !!!!!!!!!!!!!!!!!! THIS IS IMPORTANT BASED ON WHERE YOU LOAD THE TEXTURE
+	glUniform1i(glGetUniformLocation(program_box, "diffuseMap"), 3); // set the variable diffuseMap to 0 so that it uses texture0
+
+	//get the rotation matrix location in the shader
+	//Mrot_unif = glGetUniformLocation(program_box, "Mrot");
+	//glUniformMatrix4fv(Mrot_unif, 1, GL_FALSE, rotate_mat);
+
+
+}
 
 void init_object(void){
 
@@ -171,7 +354,7 @@ void init_object(void){
 	//m = new Model(program,"Objects/dpv/dpv.obj", "Objects/dpv/", false, true, 1);
 	//m = new Model(program,"Objects/ferrari_599gtb/ferrari_599gtb.obj", "Objects/ferrari_599gtb/", false, true, 1);
 	//m = new Model(program, "Objects/zombie/zombie.obj", "Objects/zombie/", false, true, 1);
-	m = new Model(program_object, "Objects/Swan/Swan.obj", "Objects/Swan/", false, true, 1);
+	m = new Model(program_object, "Objects/Swan/Swan.obj", "Objects/Swan/", false, true, 10);
 	//m = new Model(program, "Objects/Dog/ZombiDog.obj", "Objects/Dog/", false, true, 1);
 	//m = new Model(program, "Objects/Nurseknife/Nurse.obj", "Objects/Nurseknife/", false, true,10);
 	//m = new Model(program, "Objects/Policeman/Policeman.obj", "Objects/Policeman/", false, true,1);
@@ -181,6 +364,7 @@ void init_object(void){
 }
 
 void display_object(void){
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m->Draw();
 
@@ -264,6 +448,7 @@ void mouseMotion(int xx, int yy){
 
 
 
+/*
 void special(int key, int x, int y)
 {
 
@@ -395,6 +580,145 @@ void keyboard(unsigned char key, int x, int y){
 		}
 	}
 }
+*/
+
+
+void special(int key, int x, int y)
+{
+
+	float theta = 0.05f;
+
+	glm::vec3 old_cam_gaze = cam.gaze;
+	glm::vec3 old_cam_up = cam.up;
+	glm::vec3 old_cam_w = glm::cross(-cam.gaze, cam.up);
+
+	switch (key)
+	{
+	case GLUT_KEY_UP:
+
+		cam.gaze = cos(theta)*old_cam_gaze + sin(theta)*old_cam_up;
+		cam.up = cos(theta)*old_cam_up - sin(theta)*old_cam_gaze;
+		glUseProgram(program_0);
+		cam.setCameraMatrix();
+		glUseProgram(program_1);
+		cam.setCameraMatrix();
+		glutPostRedisplay();
+		break;
+
+	case GLUT_KEY_DOWN:
+
+		cam.gaze = cos(theta)*old_cam_gaze - sin(theta)*old_cam_up;
+		cam.up = cos(theta)*old_cam_up + sin(theta)*old_cam_gaze;
+		glUseProgram(program_0);
+		cam.setCameraMatrix();
+		glUseProgram(program_1);
+		cam.setCameraMatrix();
+		glutPostRedisplay();
+		break;
+
+	case GLUT_KEY_LEFT:
+		cam.gaze = cos(theta)*old_cam_gaze + sin(theta)*old_cam_w;
+		glUseProgram(program_0);
+		cam.setCameraMatrix();
+		glUseProgram(program_1);
+		cam.setCameraMatrix();
+		glutPostRedisplay();
+		break;
+
+	case GLUT_KEY_RIGHT:
+
+		cam.gaze = cos(theta)*old_cam_gaze - sin(theta)*old_cam_w;
+		glUseProgram(program_0);
+		cam.setCameraMatrix();
+		glUseProgram(program_1);
+		cam.setCameraMatrix();
+		glutPostRedisplay();
+		break;
+	}
+}
+
+void keyboard(unsigned char key, int x, int y){
+
+	glm::vec3 side = 0.1f*glm::cross(cam.gaze, cam.up);
+
+	float next_x = cam.position.x + 0.1f*cam.gaze.x;
+	float next_y = cam.position.y + 0.1f*cam.gaze.y;
+	float next_z = cam.position.z + 0.1f*cam.gaze.z;
+
+	float prev_x = cam.position.x - 0.1f*cam.gaze.x;
+	float prev_y = cam.position.y - 0.1f*cam.gaze.y;
+	float prev_z = cam.position.z - 0.1f*cam.gaze.z;
+
+	float side_right_x = cam.position.x - side.x;
+	float side_right_y = cam.position.y - side.y;
+	float side_right_z = cam.position.z - side.z;
+
+	float side_left_x = cam.position.x + side.x;
+	float side_left_y = cam.position.y + side.y;
+	float side_left_z = cam.position.z + side.z;
+
+
+	if (key == 'w'){
+		if (next_x > -(s - 2) && next_x < (s - 2) &&
+			next_y > -(s - 2) && next_y < (s - 2) &&
+			next_z > -(s - 2) && next_z < (s - 2)
+			){
+			cam.position.x += 0.1f*cam.gaze.x;
+			cam.position.z += 0.1f*cam.gaze.z;
+			glUseProgram(program_0);
+			cam.setCameraMatrix();
+			glUseProgram(program_1);
+			cam.setCameraMatrix();
+			glutPostRedisplay();
+		}
+	}
+	else if (key == 's'){
+		if (prev_x > -(s - 2) && prev_x < (s - 2) &&
+			prev_y > -(s - 2) && prev_y < (s - 2) &&
+			prev_z > -(s - 2) && prev_z < (s - 2)
+			){
+			cam.position.x -= 0.1f*cam.gaze.x;
+			cam.position.z -= 0.1f*cam.gaze.z;
+			glUseProgram(program_0);
+			cam.setCameraMatrix();
+			glUseProgram(program_1);
+			cam.setCameraMatrix();
+			glutPostRedisplay();
+		}
+	}
+	else if (key == 'a'){
+		if (side_right_x > -(s - 2) && side_right_x < (s - 2) &&
+			side_right_x > -(s - 2) && side_right_x < (s - 2) &&
+			side_right_x > -(s - 2) && side_right_x < (s - 2)
+			){
+
+			cam.position.x -= side.x;
+			cam.position.z -= side.z;
+			glUseProgram(program_0);
+			cam.setCameraMatrix();
+			glUseProgram(program_1);
+			cam.setCameraMatrix();
+			glutPostRedisplay();
+		}
+	}
+	else if (key == 'd'){
+		if (side_left_x > -(s - 2) && side_left_x < (s - 2) &&
+			side_left_x > -(s - 2) && side_left_x < (s - 2) &&
+			side_left_x > -(s - 2) && side_left_x < (s - 2)
+			){
+
+			cam.position.x += side.x;
+			cam.position.z += side.z;
+			glUseProgram(program_0);
+			cam.setCameraMatrix();
+			glUseProgram(program_1);
+			cam.setCameraMatrix();
+
+			glutPostRedisplay();
+		}
+	}
+}
+
 
 
 
@@ -404,15 +728,48 @@ void loadTextures(void){
 	tex2.Load("cobblestone.jpg");
 	tex2.Bind();
 
+	/*
+	
+	*/
+
 	glActiveTexture(GL_TEXTURE5);
-	tex0.Load("cubemaplayout.png");
+	tex0.Load("cubemaplayout_1.png");
 	tex0.Bind();
 
 	glActiveTexture(GL_TEXTURE12);			// Make texture1 active
 	tex1.Load("cobblestone_normal.jpg");	// Load texture from file
 	tex1.Bind();
 
+	glActiveTexture(GL_TEXTURE20);
+	tex3.Load("cubemaplayout_normal.png");
+	tex3.Bind();
+
+	glActiveTexture(GL_TEXTURE30);  // MAKE SURE TO GIVE A DECENT LOCATION
+	texBox.Load("Crate.png");   // WILL ALSO SNED THE PNG
+	texBox.Bind();
+
 }
+
+
+void init_camera_box(){
+	Mcam_unif = glGetUniformLocation(program_box, "Mcam");
+	Mproj_unif = glGetUniformLocation(program_box, "Mproj");
+	gaze_unif = glGetUniformLocation(program_box, "gaze");
+
+	camPos = glGetUniformLocation(program_box, "camPos");
+
+	GLuint vnewEyePos = glGetAttribLocation(program_box, "vnewEyePosition");
+	glEnableVertexAttribArray(vnewEyePos);
+	glVertexAttribPointer(vnewEyePos, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+	cam.setAttribLocations(Mcam_unif, Mproj_unif, gaze_unif);
+
+	cam.position = glm::vec3(0, -2, 0);
+	cam.gaze = glm::vec3(0, 0, -1);
+	cam.up = glm::vec3(0, 1, 0);
+	cam.setCameraMatrix();
+	cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
+};
 
 void init_camera_top(){
 	Mcam_unif = glGetUniformLocation(program_0, "Mcam");
@@ -433,7 +790,7 @@ void init_camera_top(){
 	cam.gaze = glm::vec3(0, 0, -1);
 	cam.up = glm::vec3(0, 1, 0);
 	cam.setCameraMatrix();
-	cam.setPerspectiveProjection(60, 1, -0.1, -5000);
+	cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
 }
 
 void init_camera_bottom(){
@@ -479,7 +836,9 @@ void init_camera_object(){
 	printf("Mproj_unif_object: %d", Mproj_unif);
 
 	
-	gaze_unif = glGetUniformLocation(program_object, "gaze");
+	//once added, spot light goes away
+	//gaze_unif = glGetUniformLocation(program_object, "gaze");
+
 
 	camPos = glGetUniformLocation(program_object, "camPos");
 
@@ -490,13 +849,14 @@ void init_camera_object(){
 	//glEnableVertexAttribArray(vnewEyePos);
 	//glVertexAttribPointer(vnewEyePos, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 
-	//cam.setAttribLocations(Mcam_unif, Mproj_unif, gaze_unif);
+	cam.setAttribLocations(Mcam_unif, Mproj_unif, gaze_unif);
 
-	//cam.position = glm::vec3(0, 0, 0);
-	//cam.gaze = glm::vec3(0, 0, -1);
-	//cam.up = glm::vec3(0, 1, 0);
+	cam.position = glm::vec3(0, 0, 0);
+	cam.gaze = glm::vec3(0, 0, -1);
+	cam.up = glm::vec3(0, 1, 0);
+	
 	cam.setCameraMatrix();
-	cam.setPerspectiveProjection(60, 1, -1, -100);
+	cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
 	
 	/*
 	glm::vec3 theCamPos;
@@ -511,11 +871,15 @@ void init_camera_object(){
 
 void init_topFaces(void){
 
-	ShaderInfo shader_0 = { GL_VERTEX_SHADER, "shader_0.vs", GL_FRAGMENT_SHADER, "shader_0.fs" };
-	program_0 = LoadShaders(shader_0);
+	//ShaderInfo shader_0 = { GL_VERTEX_SHADER, "shader_0.vs", GL_FRAGMENT_SHADER, "shader_0.fs" };
+	//program_0 = LoadShaders(shader_0);
 	//Shader shader0("myshader0");
 	//program_0 = shader0.Bind();
 
+	ShaderInfo shader_1 = { GL_VERTEX_SHADER, "shader_1.vs", GL_FRAGMENT_SHADER, "shader_1.fs" };
+	program_0 = LoadShaders(shader_1);
+
+	//glUseProgram(program_0);
 	glUseProgram(program_0);
 
 	init_camera_top();
@@ -555,6 +919,7 @@ void init_topFaces(void){
 	glVertexAttribPointer(vTexcoord, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vertices)));
 
 	glUniform1i(glGetUniformLocation(program_0, "diffuseMap"), 0*7+5); // set the variable diffuseMap to 0 so that it uses texture0
+	glUniform1i(glGetUniformLocation(program_0, "normalMap"),  20); // set the variable normalMap to 1 so that it uses texture1
 
 	//get the rotation matrix location in the shader
 	Mrot_unif = glGetUniformLocation(program_0, "Mrot");
@@ -643,6 +1008,7 @@ void display(){
 	glUseProgram(program_0);
 
 	glUniform3f(camPos, cam.position.x, cam.position.y, cam.position.z);
+	cam.setCameraMatrix();
 
 	glBindVertexArray(VAOs[TopFaces]);
 	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
@@ -652,20 +1018,35 @@ void display(){
 	glUseProgram(program_1);
 
 	glUniform3f(camPos, cam.position.x, cam.position.y, cam.position.z);
-
+	cam.setCameraMatrix();
 	glBindVertexArray(VAOs[BottomFace]);
 	glDrawArrays(GL_TRIANGLES, 0, NumVerticesBot);
 
+
 	glDepthMask(true);
 
+	//draw object
 	glUseProgram(program_object);
 
+	glUniform3f(camPos, cam.position.x, cam.position.y, cam.position.z);
+	cam.setCameraMatrix();
 	m->Draw();
 
 	GLint64 time;
 	glGetInteger64v(GL_TIMESTAMP, &time);
-//	glUniform1f(time_unif, (float)time / 1000000000.0f);
+	glUniform1f(time_unif, (float)time / 1000000000.0f);
 
+	//Draw boxes
+	glUseProgram(program_box);
+
+	glUniform3f(camPos, cam.position.x, cam.position.y, cam.position.z);
+	cam.setCameraMatrix();
+
+	glBindVertexArray(VAOs[smallBox]);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
+	glutPostRedisplay();
 	glFlush();
 	glutSwapBuffers();
 }
@@ -701,6 +1082,7 @@ int main(int argc, char **argv){
 	init_bottomFaces();
 
 	init_object();
+	init_box();
 
 	glutDisplayFunc(display);
 

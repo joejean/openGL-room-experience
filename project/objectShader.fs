@@ -40,10 +40,12 @@ void main(){
 }
 
 vec4 computeColor(){
-	vec3 lightPosition = vec3(0,-2,0);
-	vec3 eyePosition = vec3(0,0,-2);
+
+
+	vec3 lightPosition = vec3(0,10,0);
+	vec3 eyePosition = camPos;
 	vec3 ambientIntensity = 0.1*vec3(1,1,1);
-	vec3 diffuseIntensity = vec3(0.9,0.9,0.9);
+	vec3 diffuseIntensity = vec3(0.8,0.8,0.8);
 	vec3 specularIntensity = vec3(0.7,0.7, 0.7);
 
 	vec3 ambient = Ka;

@@ -217,6 +217,8 @@ GLint Model::gen_texture(std::string& fileName, std::string& basepath){
 	
 	GLuint m_texture;
 	glActiveTexture(GL_TEXTURE0);
+
+
 	glGenTextures(1, &m_texture);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 		

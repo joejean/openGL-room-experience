@@ -59,6 +59,12 @@
     <None Include="objectShader.fs">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="shader_box.fs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shader_box.vs">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="texture.h">

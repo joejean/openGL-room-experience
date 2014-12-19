@@ -56,7 +56,7 @@ vec4 computeColor(){
 	 
 	vec4 light = vec4(0.8,0.8,0.8,1.0);
 	vec3 eyePosition = camPos;
-	vec3 lightPosition = vec3(0,10,0); 
+	vec3 lightPosition = vec3(0,3,0); 
 	  
 	// set new color
 	vec4 ambient = vec4(0.1,0.1, 0.1, 1);
@@ -71,7 +71,7 @@ vec4 computeColor(){
 	
 	//normal=(transpose(inverse(Mproj*Mcam))*h_normal).xyz;
 
-    normal=(Mproj*Mcam*h_normal).xyz;
+    //normal=(Mproj*Mcam*h_normal).xyz;
 
 
 	normal= normalize(normal);
@@ -110,7 +110,6 @@ vec4 spotLightColor(){
 
 	
 	vec3 eyePosition = camPos;
-
 
 	vec3 dirToEye = normalize(eyePosition - position);
 	

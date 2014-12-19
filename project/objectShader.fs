@@ -42,7 +42,7 @@ void main(){
 vec4 computeColor(){
 
 
-	vec3 lightPosition = vec3(0,10,0);
+	vec3 lightPosition = vec3(0,3,0);
 	vec3 eyePosition = camPos;
 	vec3 ambientIntensity = 0.1*vec3(1,1,1);
 	vec3 diffuseIntensity = vec3(0.8,0.8,0.8);
@@ -112,7 +112,7 @@ vec4 spotLightColor(){
 	float shininess = 1;
 
 	float cosTheta = clamp(dot(theNormal, dirToLight),0,1);
-	return intensity*diffuseColor*cosTheta+intensity * specular*pow(cosSigma,shininess);
-	//return intensity*diffuseColor*cosTheta;
+	//return intensity*diffuseColor*cosTheta+intensity * specular*pow(cosSigma,shininess);
+	return intensity*diffuseColor*cosTheta;
 	//return intensity*diffuseColor;
 }

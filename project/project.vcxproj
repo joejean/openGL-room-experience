@@ -107,6 +107,8 @@
     <None Include="shader_1.fs" />
     <None Include="shader_0.vs" />
     <None Include="shader_1.vs" />
+    <None Include="shader_box.fs" />
+    <None Include="shader_box.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />

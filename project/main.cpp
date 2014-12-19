@@ -16,10 +16,13 @@ using namespace std;
 
 //Assimp::Importer importer;
 
+//GLuint spotLightSwitch
+
 GLuint Mcam_unif;
 GLuint Mproj_unif;
 GLuint gaze_unif;//send the gaze vector to fshader to do spot lighting
 
+bool draw_box = false;
 
 GLuint camPos;
 
@@ -44,11 +47,6 @@ int g_width = 512;
 
 
 GLfloat p1_x, p1_y, p2_x, p2_y;
-
-
-GLuint Mrot_unif;//location of the Mrot in shader for top
-GLuint Mrot_unif_1;//location of the Mrot in shader for bottom
-
 
 GLuint program_0;
 GLuint program_1;
@@ -80,7 +78,7 @@ GLuint Buffers[NumBuffers];
 GLfloat nearPlane = -0.1;
 GLfloat farPlane = -5000;
 
-GLfloat boxSize = 10.0f;
+GLfloat boxSize = 2.0f;
 
 GLfloat boxVertices[] = {
 	//front -- 123, 134
@@ -201,7 +199,7 @@ GLfloat texcoordsBot[] = {
 GLfloat s = 20.0f;
 
 GLfloat w = 20.0f;
-GLfloat h = 4.0f;
+GLfloat h = 20.0f;
 GLfloat l = 20.0f;
 
 //NumVertices = number of faces * 3;
@@ -279,16 +277,17 @@ Model *m;
 
 void init_camera_object();
 void init_camera_box();
+void update_camera_for_all();
 
 void init_box(){
 
-	ShaderInfo shader_box = { GL_VERTEX_SHADER, "shader_0.vs", GL_FRAGMENT_SHADER, "shader_0.fs" };
+	ShaderInfo shader_box = { GL_VERTEX_SHADER, "shader_box.vs", GL_FRAGMENT_SHADER, "shader_box.fs" };
 	program_box = LoadShaders(shader_box);
 
 
 	glUseProgram(program_box);
 
-	//init_camera_box();
+	init_camera_box();
 
 	glGenVertexArrays(1, &VAOs[smallBox]);
 	glBindVertexArray(VAOs[smallBox]);
@@ -323,18 +322,14 @@ void init_box(){
 	GLuint vTexcoord = glGetAttribLocation(program_box, "s_vTexcoord");
 	glEnableVertexAttribArray(vTexcoord);
 	glVertexAttribPointer(vTexcoord, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(boxVertices)));
-
+	
 
 	//! !!!!!!!!!!!!!!!!!! THIS IS IMPORTANT BASED ON WHERE YOU LOAD THE TEXTURE
-	glUniform1i(glGetUniformLocation(program_box, "diffuseMap"), 3); // set the variable diffuseMap to 0 so that it uses texture0
-
-	//get the rotation matrix location in the shader
-	//Mrot_unif = glGetUniformLocation(program_box, "Mrot");
-	//glUniformMatrix4fv(Mrot_unif, 1, GL_FALSE, rotate_mat);
-
+	glUniform1i(glGetUniformLocation(program_box, "diffuseMap"), 30); // set the variable diffuseMap to 0 so that it uses texture0
 
 }
 
+Model *m2;
 void init_object(void){
 
 	ShaderInfo shader_object = { GL_VERTEX_SHADER, "objectShader.vs", GL_FRAGMENT_SHADER, "objectShader.fs" };
@@ -359,22 +354,6 @@ void init_object(void){
 	//m = new Model(program, "Objects/Nurseknife/Nurse.obj", "Objects/Nurseknife/", false, true,10);
 	//m = new Model(program, "Objects/Policeman/Policeman.obj", "Objects/Policeman/", false, true,1);
 
-
-
-}
-
-void display_object(void){
-	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	m->Draw();
-
-	//GLint64 time;
-	//glGetInteger64v(GL_TIMESTAMP, &time);
-	//glUniform1f(time_unif, (float)time / 1000000000.0f);
-
-	glFlush();
-	glutSwapBuffers();
-	glutPostRedisplay();
 }
 
 
@@ -427,160 +406,10 @@ void mouseMotion(int xx, int yy){
 
 	cam.gaze = cos(x)*t_gaze - sin(x)*t_w;
 
-	glUseProgram(program_0);
-	cam.setCameraMatrix();
-
-	cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
-
-	glUseProgram(program_1);
-	cam.setCameraMatrix();
-	cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
-
-	glutPostRedisplay();
-
-
-	glUseProgram(program_object);
-	cam.setCameraMatrix();
-	cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
+	update_camera_for_all();
 
 	glutPostRedisplay();
 }
-
-
-
-/*
-void special(int key, int x, int y)
-{
-
-	float theta = 0.05f;
-
-
-	glm::vec3 old_cam_gaze = cam.gaze;
-	glm::vec3 old_cam_up = cam.up;
-	glm::vec3 old_cam_w = glm::cross(-cam.gaze, cam.up);
-
-	switch (key)
-	{
-	case GLUT_KEY_UP:
-
-		cam.gaze = cos(theta)*old_cam_gaze + sin(theta)*old_cam_up;
-		cam.up = cos(theta)*old_cam_up - sin(theta)*old_cam_gaze;
-		glUseProgram(program_0);
-		cam.setCameraMatrix();
-		glUseProgram(program_1);
-		cam.setCameraMatrix();
-		glutPostRedisplay();
-
-		glUseProgram(program_object);
-		cam.setCameraMatrix();
-		cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
-
-		glutPostRedisplay();
-
-		break;
-
-	case GLUT_KEY_DOWN:
-
-		cam.gaze = cos(theta)*old_cam_gaze - sin(theta)*old_cam_up;
-		cam.up = cos(theta)*old_cam_up + sin(theta)*old_cam_gaze;
-		glUseProgram(program_0);
-		cam.setCameraMatrix();
-		glUseProgram(program_1);
-		cam.setCameraMatrix();
-		glutPostRedisplay();
-
-		glUseProgram(program_object);
-		cam.setCameraMatrix();
-		cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
-
-		glutPostRedisplay();
-
-		break;
-
-	case GLUT_KEY_LEFT:
-		cam.gaze = cos(theta)*old_cam_gaze + sin(theta)*old_cam_w;
-		glUseProgram(program_0);
-		cam.setCameraMatrix();
-		glUseProgram(program_1);
-		cam.setCameraMatrix();
-		glutPostRedisplay();
-		glUseProgram(program_object);
-		cam.setCameraMatrix();
-		cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
-
-		glutPostRedisplay();
-
-		break;
-
-	case GLUT_KEY_RIGHT:
-
-		cam.gaze = cos(theta)*old_cam_gaze - sin(theta)*old_cam_w;
-		glUseProgram(program_0);
-		cam.setCameraMatrix();
-		glUseProgram(program_1);
-		cam.setCameraMatrix();
-		glutPostRedisplay();
-		glUseProgram(program_object);
-		cam.setCameraMatrix();
-		cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
-
-		glutPostRedisplay();
-
-		break;
-	}
-}
-
-
-void keyboard(unsigned char key, int x, int y){
-	float next_x = cam.position.x + 0.1f*cam.gaze.x;
-	float next_y = cam.position.y + 0.1f*cam.gaze.y;
-	float next_z = cam.position.z + 0.1f*cam.gaze.z;
-
-	float prev_x = cam.position.x - 0.1f*cam.gaze.x;
-	float prev_y = cam.position.y - 0.1f*cam.gaze.y;
-	float prev_z = cam.position.z - 0.1f*cam.gaze.z;
-
-
-	if (key == 'w'){
-		if (next_x > -8.0f  && next_x < 8.0f &&
-			next_y > -8.0f  && next_y < 8.0f &&
-			next_z > -8.0f  && next_z < 8.0f
-			){
-			cam.position += 0.1f*cam.gaze;
-			glUseProgram(program_0);
-			cam.setCameraMatrix();
-			glUseProgram(program_1);
-			cam.setCameraMatrix();
-			glutPostRedisplay();
-			glUseProgram(program_object);
-			cam.setCameraMatrix();
-			cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
-
-			glutPostRedisplay();
-
-		}
-	}
-	else if (key == 's'){
-		if (prev_x > -8.0f  && prev_x < 8.0f &&
-			prev_y > -8.0f  && prev_y < 8.0f &&
-			prev_z > -8.0f  && prev_z < 8.0f
-			){
-			cam.position -= 0.1f*cam.gaze;
-			glUseProgram(program_0);
-			cam.setCameraMatrix();
-			glUseProgram(program_1);
-			cam.setCameraMatrix();
-			glutPostRedisplay();
-
-			glUseProgram(program_object);
-			cam.setCameraMatrix();
-			cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
-			glutPostRedisplay();
-
-		}
-	}
-}
-*/
 
 
 void special(int key, int x, int y)
@@ -598,10 +427,9 @@ void special(int key, int x, int y)
 
 		cam.gaze = cos(theta)*old_cam_gaze + sin(theta)*old_cam_up;
 		cam.up = cos(theta)*old_cam_up - sin(theta)*old_cam_gaze;
-		glUseProgram(program_0);
-		cam.setCameraMatrix();
-		glUseProgram(program_1);
-		cam.setCameraMatrix();
+		
+		update_camera_for_all();
+
 		glutPostRedisplay();
 		break;
 
@@ -609,29 +437,25 @@ void special(int key, int x, int y)
 
 		cam.gaze = cos(theta)*old_cam_gaze - sin(theta)*old_cam_up;
 		cam.up = cos(theta)*old_cam_up + sin(theta)*old_cam_gaze;
-		glUseProgram(program_0);
-		cam.setCameraMatrix();
-		glUseProgram(program_1);
-		cam.setCameraMatrix();
+		
+		update_camera_for_all();
+
 		glutPostRedisplay();
 		break;
 
 	case GLUT_KEY_LEFT:
 		cam.gaze = cos(theta)*old_cam_gaze + sin(theta)*old_cam_w;
-		glUseProgram(program_0);
-		cam.setCameraMatrix();
-		glUseProgram(program_1);
-		cam.setCameraMatrix();
+
+		update_camera_for_all();
+
 		glutPostRedisplay();
 		break;
 
 	case GLUT_KEY_RIGHT:
 
 		cam.gaze = cos(theta)*old_cam_gaze - sin(theta)*old_cam_w;
-		glUseProgram(program_0);
-		cam.setCameraMatrix();
-		glUseProgram(program_1);
-		cam.setCameraMatrix();
+		update_camera_for_all();
+
 		glutPostRedisplay();
 		break;
 	}
@@ -665,10 +489,9 @@ void keyboard(unsigned char key, int x, int y){
 			){
 			cam.position.x += 0.1f*cam.gaze.x;
 			cam.position.z += 0.1f*cam.gaze.z;
-			glUseProgram(program_0);
-			cam.setCameraMatrix();
-			glUseProgram(program_1);
-			cam.setCameraMatrix();
+
+			update_camera_for_all();
+
 			glutPostRedisplay();
 		}
 	}
@@ -679,10 +502,10 @@ void keyboard(unsigned char key, int x, int y){
 			){
 			cam.position.x -= 0.1f*cam.gaze.x;
 			cam.position.z -= 0.1f*cam.gaze.z;
-			glUseProgram(program_0);
-			cam.setCameraMatrix();
-			glUseProgram(program_1);
-			cam.setCameraMatrix();
+
+			update_camera_for_all();
+
+
 			glutPostRedisplay();
 		}
 	}
@@ -694,10 +517,10 @@ void keyboard(unsigned char key, int x, int y){
 
 			cam.position.x -= side.x;
 			cam.position.z -= side.z;
-			glUseProgram(program_0);
-			cam.setCameraMatrix();
-			glUseProgram(program_1);
-			cam.setCameraMatrix();
+
+			update_camera_for_all();
+
+
 			glutPostRedisplay();
 		}
 	}
@@ -709,16 +532,30 @@ void keyboard(unsigned char key, int x, int y){
 
 			cam.position.x += side.x;
 			cam.position.z += side.z;
+
 			glUseProgram(program_0);
 			cam.setCameraMatrix();
 			glUseProgram(program_1);
 			cam.setCameraMatrix();
+
+			glUseProgram(program_object);
+			cam.setCameraMatrix();
+
 
 			glutPostRedisplay();
 		}
 	}
 }
 
+void update_camera_for_all(){
+
+	glUseProgram(program_0);
+	cam.setCameraMatrix();
+	glUseProgram(program_1);
+	cam.setCameraMatrix();
+	glUseProgram(program_object);
+	cam.setCameraMatrix();
+};
 
 
 
@@ -727,10 +564,6 @@ void loadTextures(void){
 	glActiveTexture(GL_TEXTURE19);
 	tex2.Load("cobblestone.jpg");
 	tex2.Bind();
-
-	/*
-	
-	*/
 
 	glActiveTexture(GL_TEXTURE5);
 	tex0.Load("cubemaplayout_1.png");
@@ -854,10 +687,10 @@ void init_camera_object(){
 	cam.position = glm::vec3(0, 0, 0);
 	cam.gaze = glm::vec3(0, 0, -1);
 	cam.up = glm::vec3(0, 1, 0);
-	
+
 	cam.setCameraMatrix();
 	cam.setPerspectiveProjection(60, 1, nearPlane, farPlane);
-	
+
 	/*
 	glm::vec3 theCamPos;
 	GLfloat theCamPosX=1.0;
@@ -921,10 +754,6 @@ void init_topFaces(void){
 	glUniform1i(glGetUniformLocation(program_0, "diffuseMap"), 0*7+5); // set the variable diffuseMap to 0 so that it uses texture0
 	glUniform1i(glGetUniformLocation(program_0, "normalMap"),  20); // set the variable normalMap to 1 so that it uses texture1
 
-	//get the rotation matrix location in the shader
-	Mrot_unif = glGetUniformLocation(program_0, "Mrot");
-	glUniformMatrix4fv(Mrot_unif, 1, GL_FALSE, rotate_mat);
-
 	//****************END RENDER TOP 5 FACES
 
 }
@@ -982,11 +811,6 @@ void init_bottomFaces()
 	//glUniform1i(glGetUniformLocation(program_1, "normalMap"), 1*7+5); // set the variable normalMap to 1 so that it uses texture1
 	glUniform1i(glGetUniformLocation(program_1, "normalMap"), 12); // set the variable normalMap to 1 so that it uses texture1
 
-
-	//get the rotation matrix location in the shader
-	Mrot_unif_1 = glGetUniformLocation(program_1, "Mrot_1");
-	glUniformMatrix4fv(Mrot_unif_1, 1, GL_FALSE, rotate_mat);
-
 	glBindVertexArray(0);
 	//*******************END Render Bottom Face****************
 
@@ -1003,6 +827,8 @@ void display(){
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+	
 	glDepthMask(false);
 	//Draw Topfaces
 	glUseProgram(program_0);
@@ -1016,19 +842,19 @@ void display(){
 
 	//Draw Bottomface
 	glUseProgram(program_1);
-
 	glUniform3f(camPos, cam.position.x, cam.position.y, cam.position.z);
+
 	cam.setCameraMatrix();
 	glBindVertexArray(VAOs[BottomFace]);
 	glDrawArrays(GL_TRIANGLES, 0, NumVerticesBot);
-
 
 	glDepthMask(true);
 
 	//draw object
 	glUseProgram(program_object);
-
 	glUniform3f(camPos, cam.position.x, cam.position.y, cam.position.z);
+
+
 	cam.setCameraMatrix();
 	m->Draw();
 
@@ -1037,14 +863,18 @@ void display(){
 	glUniform1f(time_unif, (float)time / 1000000000.0f);
 
 	//Draw boxes
-	glUseProgram(program_box);
+	
 
-	glUniform3f(camPos, cam.position.x, cam.position.y, cam.position.z);
-	cam.setCameraMatrix();
+	if (draw_box)
+	{
+		glUseProgram(program_box);
 
-	glBindVertexArray(VAOs[smallBox]);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+		glUniform3f(camPos, cam.position.x, cam.position.y, cam.position.z);
+		cam.setCameraMatrix();
 
+		glBindVertexArray(VAOs[smallBox]);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
 
 	glutPostRedisplay();
 	glFlush();
@@ -1062,7 +892,7 @@ int main(int argc, char **argv){
 	glutInitContextVersion(3, 0);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 
-	glutCreateWindow("Rock is the Daady");
+	glutCreateWindow("Walking Dead, Floating Truck and The Hollow Box");
 
 
 	glewExperimental = GL_TRUE;
@@ -1082,6 +912,8 @@ int main(int argc, char **argv){
 	init_bottomFaces();
 
 	init_object();
+
+	if (draw_box)
 	init_box();
 
 	glutDisplayFunc(display);
